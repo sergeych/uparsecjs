@@ -1,4 +1,4 @@
-import { compareVersions, CORE_VERSION, sha256 } from "./index";
+import { compareVersions, CORE_VERSION, sha256 } from "../src";
 
 it("has right version and compare",()=> {
   expect(compareVersions("0.1.0", "0.1.0")).toBe(0);

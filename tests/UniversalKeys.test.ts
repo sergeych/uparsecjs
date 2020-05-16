@@ -11,10 +11,10 @@ import {
   UniversalPasswordKey,
   UniversalPrivateKey,
   UniversalSymmetricKey
-} from './UnversalKeys';
+} from '../src/UnversalKeys';
 
 // import { Coffer, CofferException, SerializedCoffer } from "@/sergecych.uni3/Coffer";
-import { bytesToUtf8, utf8ToBytes } from "./tools";
+import { bytesToUtf8, utf8ToBytes } from "../src/tools";
 // import { decode64, encode58, PrivateKey, textToBytes } from "universa-wasm";
 // import { Passwords } from "@/sergecych.uni3/Passwords";
 
