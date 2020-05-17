@@ -332,7 +332,7 @@ export class UniversalPrivateKey extends UniversalKey {
     const packed = bossLoad<any>(ciphertext);
     switch (packed[0]) {
       case 0:
-        return this.privateKey.decrypt(packed[1] as Uint8Array, this.options);
+        return await this.privateKey.decrypt(packed[1] as Uint8Array, this.options);
       case 1: {
         const [ptk, chunk1] = bossLoad<Uint8Array[]>(
           await this.privateKey.decrypt(packed[1], this.options)
