@@ -356,7 +356,7 @@ export class UniversalPrivateKey extends UniversalKey {
     const maxDataSize = await this.maxDataSize();
     if (plaintext.length + MIN_PADDING < maxDataSize)
       // short and simple
-      return bossDump([0, this.publicKey.encrypt(plaintext, this.options)]);
+      return bossDump([0, await this.publicKey.encrypt(plaintext, this.options)]);
     else {
       // long plaintext: encrypted temporary key
       const tk = new SymmetricKey();
