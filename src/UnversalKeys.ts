@@ -259,11 +259,11 @@ export class UniversalSymmetricKey extends UniversalKey {
   }
 
   async decrypt(ciphertext: Uint8Array) {
-    return this.key.etaDecrypt(ciphertext);
+    return await this.key.etaDecrypt(ciphertext);
   }
 
   async encrypt(plaintext: Uint8Array) {
-    return this.key.etaEncrypt(plaintext);
+    return await this.key.etaEncrypt(plaintext);
   }
 
   async serialize() {
@@ -338,7 +338,7 @@ export class UniversalPrivateKey extends UniversalKey {
           await this.privateKey.decrypt(packed[1], this.options)
         );
         const tk = new SymmetricKey({ keyBytes: ptk });
-        const chunk2 = tk.etaDecrypt(packed[2]);
+        const chunk2 = await tk.etaDecrypt(packed[2]);
         const result = new Uint8Array(chunk1.length + chunk2.length);
         result.set(chunk1, 0);
         result.set(chunk2, chunk1.length);
@@ -367,7 +367,7 @@ export class UniversalPrivateKey extends UniversalKey {
       return bossDump([
         1,
         await this.publicKey.encrypt(bossDump([packedTk, chunk1]), this.options),
-        tk.etaEncrypt(chunk2)
+        await tk.etaEncrypt(chunk2)
       ]);
     }
   }
@@ -514,7 +514,7 @@ export class UniversalPasswordKey extends UniversalKey {
 
 
   async decrypt(ciphertext: Uint8Array) {
-    return (await this.key).etaDecrypt(ciphertext);
+    return await (await this.key).etaDecrypt(ciphertext);
   }
 
   get symmetricKey(): Promise<SymmetricKey> {
@@ -522,10 +522,16 @@ export class UniversalPasswordKey extends UniversalKey {
   }
 
   async encrypt(plaintext: Uint8Array) {
-    return (await this.key).etaEncrypt(plaintext);
+    return await (await this.key).etaEncrypt(plaintext);
+  }
+
+  async waitDerived() {
+    await this.symmetricKey;
   }
 
   async serialize() {
+    // ensure it is derived
+    await this.waitDerived();
     return {
       tag: this.tag,
       packedKey: (await this.key).pack()

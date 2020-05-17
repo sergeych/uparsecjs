@@ -13,8 +13,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "fastestsmallesttextencoderdecoder": "^1.0.21",
-    "universa-wasm": "^0.2.1"
+    "fastestsmallesttextencoderdecoder": "^1.0.14",
+    "universa-wasm": "^0.3.0"
   },
   "devDependencies": {
     "@babel/parser": "^7.9.6",

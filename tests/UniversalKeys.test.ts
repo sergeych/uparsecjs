@@ -15,19 +15,21 @@ import {
 
 // import { Coffer, CofferException, SerializedCoffer } from "@/sergecych.uni3/Coffer";
 import { bytesToUtf8, utf8ToBytes } from "../src/tools";
-// import { decode64, encode58, PrivateKey, textToBytes } from "universa-wasm";
-// import { Passwords } from "@/sergecych.uni3/Passwords";
-
 
 async function testUniversalKey(key: UniversalKey) {
-  testDeEncrypt(key);
-  const key1 = await UniversalKeys.loadFrom(await key.serialize());
-  testDeEncrypt(key1);
-  const src = utf8ToBytes("foobar");
-  // console.log(key.serialize());
-  // console.log(key1.serialize());
-  expect(await key1.decrypt(await key.encrypt(src))).toStrictEqual(src);
-  // expect(key1.match(key));
+  try {
+    const key1 = await UniversalKeys.loadFrom(await key.serialize());
+    testDeEncrypt(key1);
+    const src = utf8ToBytes("foobar");
+    // console.log(key.serialize());
+    // console.log(key1.serialize());
+    expect(await key1.decrypt(await key.encrypt(src))).toStrictEqual(src);
+    // expect(key1.match(key));
+  }
+  catch(e) {
+    console.error("testuniveralKey failed:", e);
+    fail("unexpected error: "+e);
+  }
 }
 
 async function testDeEncrypt(key: UniversalKey) {
@@ -49,14 +51,14 @@ async function testDeEncrypt(key: UniversalKey) {
 describe("UniversalKeys", () => {
 
   it("de/encrypts shorts and longs with private keys", async () => {
-    testUniversalKey(await UniversalPrivateKey.generate(2048));
+    await testUniversalKey(await UniversalPrivateKey.generate(2048));
   });
 
   it("de/encrypts shorts and longs with symmetric keys", async () => {
-    testUniversalKey(UniversalSymmetricKey.createRandom());
+    await testUniversalKey(UniversalSymmetricKey.createRandom());
   });
 
-  it("de/encrypts shorts and longs with symmetric keys", async () => {
+  it("de/encrypts shorts and longs with password keys", async () => {
     // We will make different keys from the same password:
     const opts1 = {
       ...defaultPKDOptions,
@@ -72,12 +74,14 @@ describe("UniversalKeys", () => {
       password: "123123",
       pkdOptions: opts1
     });
-    testUniversalKey(k1);
+    await testUniversalKey(k1);
+
     const k2 = new UniversalPasswordKey({
       password: "123123",
       pkdOptions: opts2
     });
     testUniversalKey(k2);
+
     const k3 = new UniversalPasswordKey({
       password: "otherpassword",
       pkdOptions: opts2
@@ -86,10 +90,13 @@ describe("UniversalKeys", () => {
       "otherpassword",
       { rounds: 10 }
     );
-    testUniversalKey(k3);
+    await testUniversalKey(k3);
+    await testUniversalKey(k4);
+
     // password are different cache should not be used:
     expect((await k3.symmetricKey).pack()).not.toStrictEqual((await k2.symmetricKey).pack());
     expect((await k3.symmetricKey).pack()).not.toStrictEqual((await k4.symmetricKey).pack());
+
   });
 
   it("provides password multikeys", async () => {
