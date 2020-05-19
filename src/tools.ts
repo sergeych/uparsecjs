@@ -33,13 +33,13 @@ export async function retry<T>(
       return result;
     } catch (e) {
       if (attempt++ >= times) throw e;
-      console.debug(`retry failed #${attempt}: ${e}`);
       await timeout(timeoutInMillis);
     }
   }
 }
 
 // nodejs polyfill
+/* istanbul ignore next */
 if (!window.TextDecoder || !window.TextEncoder) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const {

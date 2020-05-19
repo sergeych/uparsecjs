@@ -1,19 +1,16 @@
 import {
-  bytesToHex,
   encode64,
   pbkdf2,
   PrivateKey,
   PublicKey,
   PublicKeyEncryptOpts,
   randomBytes,
-  SHA,
   SymmetricKey
 } from "universa-wasm";
-import { utf8ToBytes } from "./tools";
 import { bossDump, bossLoad } from "./SimpleBoss";
-import { strict } from "assert";
 import { sha256 } from "./index";
 
+/* istanbul ignore next */
 export class UniversalKeyException extends Error {
   constructor(text: string) {
     super(text);
@@ -186,6 +183,8 @@ export interface SerializedUniversalKey {
   options?: any;
 }
 
+/* istanbul ignore next */
+
 /**
  * Abstract UniversalKey
  */
@@ -279,6 +278,18 @@ export class UniversalSymmetricKey extends UniversalKey {
       serialized.tag.id
     );
   }
+
+  /**
+   * Create a key from a binary key (in sense of AES) itself and a tag to associate with. Note that there is no
+   * way to create cryptographically strong, e.g. independent, tag from key bytes so we do not try. The most (though
+   * not ideally) safe approach is to derive a tag using KDF with many rounds, but it is slow, and not absolutely safe.
+   *
+   * @param keyBytes
+   * @param keyTag if not specified, random tag will be assigned. This is potentially bad situation.
+   */
+  static fromKey(keyBytes: Uint8Array, keyTag?: Uint8Array) {
+    return new UniversalSymmetricKey(new SymmetricKey({keyBytes:keyBytes}), keyTag ?? randomBytes(32));
+  }
 }
 
 const rsaAlgorithm = "RSA-OAEP";
@@ -295,7 +306,7 @@ export class UniversalPrivateKey extends UniversalKey {
 
   private readonly options = { ...UniversalPrivateKey.defaultOptions };
 
-  constructor(privateKey: PrivateKey, options = {}) {
+  private constructor(privateKey: PrivateKey, options = {}) {
     super();
     this.privateKey = privateKey;
     this.options = { ...this.options, ...options };
@@ -315,6 +326,7 @@ export class UniversalPrivateKey extends UniversalKey {
   }
 
   static async deserialize(source: SerializedUniversalKey): Promise<UniversalPrivateKey> {
+    /* istanbul ignore next */
     if ((source?.algorithm ?? rsaAlgorithm) != rsaAlgorithm)
       throw new UniversalKeyException("can't deserialize algorithm: " + source.algorithm);
     const key = await PrivateKey.unpack(source.packedKey);
@@ -345,6 +357,7 @@ export class UniversalPrivateKey extends UniversalKey {
         return result;
       }
       default:
+        /* istanbul ignore next */
         throw new UniversalKeyException(
           "unknown encrypted record type" + packed[0]
         );
@@ -424,14 +437,18 @@ async function getKDFData(password: string, params: PKDOptions): Promise<Uint8Ar
   let data = kdfSpaces.get(key);
 
   if (!data) {
+    /* istanbul ignore next */
     if (params.kdfAlgorithm != "PBKDF2")
       throw new Error("unsupported KDF function " + params.kdfAlgorithm);
+    /* istanbul ignore next */
     if (params.keyOffset < params.idLength)
       throw new Error("inconsistent KDF data: key overlaps the id");
+    /* istanbul ignore next */
     if (params.keyOffset + params.kdfLength < params.kdfLength)
       throw new Error(
         "inconsistent KDF data: key is not contained in the kdfSpace"
       );
+    /* istanbul ignore next */
     if (params.idLength < 1 || params.keyLength < 4)
       throw new Error("illegal length parameters");
 
@@ -467,11 +484,13 @@ export class UniversalPasswordKey extends UniversalKey {
    * @param password
    * @param pkdOptions
    */
-  static deriveFrom(
+  static async deriveFrom(
     password: string,
     pkdOptions?: Partial<PKDOptions>
-  ): UniversalPasswordKey {
-    return new UniversalPasswordKey({ password, pkdOptions });
+  ): Promise<UniversalPasswordKey> {
+    const key = new UniversalPasswordKey({ password, pkdOptions });
+    await key.waitDerived()
+    return key;
   }
 
   /**
@@ -488,6 +507,7 @@ export class UniversalPasswordKey extends UniversalKey {
   private async deriveKey(options: PasswordKeyOptions) {
     if (options.password) {
       const params = { ...defaultPKDOptions, ...options.pkdOptions };
+      /* istanbul ignore next */
       if (params.kdfAlgorithm != "PBKDF2")
         throw new Error("unsupported KDF function " + params.kdfAlgorithm);
       const bytes = await getKDFData(options.password, params);
@@ -559,12 +579,11 @@ export class UniversalPasswordKey extends UniversalKey {
       // we want to avoid unneccessary recalculations in parallel threads. to make cache
       // work we should not start KDF in parallel (what constructor actually does). So
       // constructor start derivation:
-      const k = UniversalPasswordKey.deriveFrom(password, {
+      const k = await UniversalPasswordKey.deriveFrom(password, {
         ...opts,
         keyOffset: opts.idLength + i * opts.keyLength
       });
       // forcing await derivation done and cache warmed:
-      await k.symmetricKey;
       // then save it and go further
       keys.push(k);
     }

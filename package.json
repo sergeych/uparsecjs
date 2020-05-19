@@ -8,9 +8,13 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "link": "npm run build && cd dist && npm link",
-    "build": "tsc && yarn make:docs",
+    "build": "tsc",
+    "full_build": "tsc && yarn make:docs",
     "make:docs": "typedoc",
-    "test": "jest"
+    "test": "jest --coverage"
+  },
+  "bin": {
+    "uencrypt": "dist/cli/uencrypt.js"
   },
   "dependencies": {
     "fastestsmallesttextencoderdecoder": ">1.0.14",
