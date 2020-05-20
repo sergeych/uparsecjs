@@ -1,52 +1,3 @@
-/**
- * Safebox: cryptocontainer accessible by 1+ Universal Keys. Variant of Universa Capsule
- * better suited the task of private storage.
- *
- * # Use cases
- *
- * ## New safebox from scratch
- *
- * Create new safebox, add/replace content, add/remove keys
- *
- * ~~~
- *   const box = Coffer.create();
- *   box.payload = "foo bar beyond all recognition!";
- *   box.addKeys(someKey)
- *   box.pack()
- * ~~~
- *
- * ## Open existing safebox using one known key
- *
- * If at least one key is known, it is possible to open a packed sandbox. With the open sandbox it is possoble
- * to change data and keys and repack it.
- *
- * ~~~
- * const box = Coffer.unpack(packedBytes, keys)
- * if( !box ) throw "shit happens";
- * box.payload += "shit happens!";
- * box.addKeys(newKey);
- * box.pack();
- * ~~~
- *
- * ## No way to remove key
- *
- * Inner key is still the same. So no use to remove a key without repacking.
- *
- * ## Extract keyTags
- *
- * It could be necessary if for example the system could ask the password from the user if need, and needs
- * to know if there are password keys and derival parameters.
- * ~~~
- *  let pkdOptions = Safebox.extractPKDOptions(packed);
- *  // try to derive password from
- * ~~~
- *
- * ## Change inner key
- *
- * This procedure is only needed if one of keys ever used with it is compromised. To perform it, one should
- * __create new Safebox with needed keys only__. This is clear and simple procedure, in any case change
- * possibly comprimised inner key needs all sandbox keys to which it will remain available.
- */
 import { PasswordKeyTag, UniversalKey, UniversalKeyTag, UniversalPasswordKey } from "./UnversalKeys";
 
 import { Boss, bytesToHex, randomBytes, SymmetricKey, textToBytes } from "universa-wasm";
@@ -69,13 +20,76 @@ export class CofferException extends Error {
   }
 }
 
+/**
+ * Coffer: cryptocontainer locked by any of some set of keys (at least one, no "open" coffers could exist).
+ * Variant of Universa Capsule, simplified and enhanced in the same time. Primarly to exchange data among multiple
+ * parties in end-to-end environment, safe cloud stores, etc.
+ *
+ * # Use cases
+ *
+ * ## New safebox from scratch
+ *
+ * Create new safebox, add/replace content, add/remove keys
+ *
+ * ~~~
+ *   const box = await Coffer.create();
+ *   box.payload = "foo bar beyond all recognition!";
+ *   await box.addKeys(someKey);
+ *   const packedBytes = await box.pack();
+ * ~~~
+ *
+ * ## Open existing coffeer using one known key
+ *
+ * If at least one key is known, it is possible to open a packed sandbox. With the open coffer it is possoble
+ * to change data and keys and repack it.
+ *
+ * ~~~
+ * const box = await Coffer.unpack(packedBytes, keys)
+ * // change payload
+ * box.payload += "; and please be forewarned: shit happens.";
+ * // add one more key
+ * await box.addKeys(newKey);
+ * // now pack to store updated coffer
+ * const newPackedBytes = await box.pack();
+ * ~~~
+ *
+ * ## No way to remove key
+ *
+ * Inner key is still the same. So no use to remove a key without repacking.
+ *
+ * ## Check the coffer can be unlocked with a password
+ *
+ * ~~~
+ *  if( Coffer.hasPassword(packedCoffer) ) {
+ *    // hypotetic code
+ *    const password: string = prompt("enter password:");
+ *    await Coffer.unpack(packedCoffer, password);
+ *  }
+ *  else {
+ *    // use some other key
+ *  }
+ * ~~~
+ *
+ * ## Change inner key
+ *
+ * This procedure is only needed if one of keys ever used with it is compromised. To perform it,
+ * __create new Coffer with only needed keys only__. There is no way to do it somehow else without
+ * seriously compromising content.
+ */
 export class Coffer {
   private packedInnerKey: Uint8Array | undefined;
 
+  /**
+   * true means keys or payload has been changed and updated packed coffer mist likely has to be
+   * stored.
+   */
   get isDirty(): Boolean {
     return this._isDirty;
   }
 
+  /**
+   * Get coffer payload as binary data
+   */
   get payload(): Uint8Array | null {
     return this._payload;
   }
@@ -115,8 +129,12 @@ export class Coffer {
   private innerKeyRecords = new Map<string, InnerKeyRecord>();
 
   /**
-   * Check that serialized or packed coffer could be opened with a password
-   * @param source if it can
+   * Check that serialized or packed coffer could be opened with a password. It does not construct and
+   * unpack it, just check it could be unlocked with a password.
+   *
+   * @param source packed ot serialized coffer
+   * @return true if it can. It does not mean that the coffer is only password-locked, there could be many keys and even
+   *         several passwords.
    */
   static hasPassword(source: SerializedCoffer | Uint8Array): Boolean {
     const s: SerializedCoffer = source instanceof Uint8Array ? bossLoad(source) : source;
@@ -130,7 +148,7 @@ export class Coffer {
 
   /**
    * After construction, coffer is not ready, it should await setup prior to be exposed to
-   * piblic and used.
+   * public and used.
    * @param serialized coffer
    * @param keys tpo try to open it
    */
@@ -192,6 +210,11 @@ export class Coffer {
 
   private _preparedPayload: Uint8Array | undefined;
 
+  /**
+   * Get serialized coffer as an object. This object contains binary data so serializing it with bare JSON
+   * might ve ineffective or even buggy. BOSS serialization is OK. Good to store inside other structures
+   * to be later serialized with BOSS to get most of its caching data.
+   */
   async serialize(): Promise<SerializedCoffer> {
     if (!this._preparedPayload) {
       // there should be keys!
@@ -209,6 +232,12 @@ export class Coffer {
     };
   }
 
+  /**
+   * Add one or more keys that will unlock this coffer. The coffer becomes dirty.
+   *
+   * @param keys to add. Technically, it is possible to add one key several times but it will be logged
+   *        to the console.
+   */
   async addKeys(...keys: UniversalKey[]) {
     for (let k of keys) {
       const key = bytesToHex(k.tag.id);
@@ -226,6 +255,9 @@ export class Coffer {
 
   private cachedPack: Uint8Array | undefined;
 
+  /**
+   * Get the packed binary representation of the coffer. It uses bits-effective BOSS serialization. See {{SimpleBoss}} for details.
+   */
   async pack(): Promise<Uint8Array> {
     if (!this.cachedPack || this._isDirty) {
       this.cachedPack = new Boss().dump(await this.serialize());
@@ -260,6 +292,7 @@ export class Coffer {
    *
    * @param packed coffer
    * @param keys and/or passwords in any combination
+   * @throws CofferException if the coffer could not be unpacked with presented keys, is broken and so on.
    */
   static async unpack(packed: Uint8Array, ...keys: (UniversalKey | string)[]): Promise<Coffer> {
     return await new Coffer().setup(new Boss().load(packed) as SerializedCoffer, ...keys);
