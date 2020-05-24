@@ -1,5 +1,7 @@
 import { byteArrayToLong, decode64url, encode64url, longToByteArray, retry } from "../src/tools";
 import { decode64, encode64 } from "universa-wasm";
+import { CompletablePromise } from "../src/CompletablePromise";
+import { Completable } from "../src/Completable";
 
 it("retry OK", async () => {
   let count = 0;
@@ -46,3 +48,52 @@ it("de/encodes URLs", () => {
   expect(encode64url(source)).toBe("a-b__cc");
   expect(decode64url(encode64url(source))).toStrictEqual(source);
 });
+
+it("runs completable promises", async () => {
+  const cf1 = new Completable<string>();
+  expect(cf1.isCompleted).toBeFalsy();
+  expect(cf1.isResolved).toBeFalsy();
+  expect(cf1.isRejected).toBeFalsy()
+  cf1.resolve("foo")
+  expect(await cf1.promise).toBe("foo");
+  expect(cf1.isCompleted).toBeTruthy();
+  expect(cf1.isResolved).toBeTruthy();
+  expect(cf1.isRejected).toBeFalsy()
+
+  const cf2 = new Completable<string>();
+  cf2.reject("bar")
+  let result = "bad";
+  // cf2.then(() => { fail("it should not call then") } )
+  cf2.promise.catch((e) => {
+      result = e
+    })
+    .finally(() => {
+      expect(result).toBe("bar");
+      expect(cf2.isCompleted).toBeTruthy();
+      expect(cf2.isRejected).toBeTruthy();
+      expect(cf2.isResolved).toBeFalsy();
+      expect(() => {
+        cf2.resolve("123");
+      }).toThrow("already completed");
+    })
+  const cf3 = new Completable();
+  cf3.resolve();
+  expect(() => { cf3.reject()}).toThrow("already completed");
+
+  // strangely it does not wait
+  const cf4 = new Completable();
+  const waiter1 = new Completable();
+  cf4.promise.finally(() => {
+    waiter1.resolve();
+    console.log("finally fired");
+  });
+  cf4.reject(new Error("test=1"));
+  await waiter1.promise;
+  try {
+    await cf4.promise;
+    fail("it sholud throw exception before");
+  }
+  catch(e) {
+    console.log("expected error",e);
+  }
+})
