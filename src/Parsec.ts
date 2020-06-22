@@ -1,5 +1,5 @@
 import { bossDump, bossLoad } from "./SimpleBoss";
-import { SymmetricKey } from "universa-wasm";
+import { SymmetricKey } from "unicrypto";
 
 const isNode = typeof module !== 'undefined' && module.exports;
 const isBrowser = !isNode;

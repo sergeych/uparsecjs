@@ -24,7 +24,7 @@ export function compareVersions(v1: string,v2: string) {
   return 0;
 }
 
-import {SHA} from 'universa-wasm';
+import {SHA} from 'unicrypto';
 
 export async function sha256(data: Uint8Array | string) {
   if( !(data instanceof Uint8Array) )

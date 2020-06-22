@@ -1,6 +1,6 @@
 import { PasswordKeyTag, UniversalKey, UniversalKeyTag, UniversalPasswordKey } from "./UnversalKeys";
 
-import { Boss, bytesToHex, randomBytes, SymmetricKey, textToBytes } from "universa-wasm";
+import { Boss, bytesToHex, randomBytes, SymmetricKey, textToBytes } from "unicrypto";
 import { bytesToUtf8 } from "./tools";
 import { bossDump, bossLoad } from "./SimpleBoss";
 

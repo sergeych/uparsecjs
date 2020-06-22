@@ -1,4 +1,4 @@
-import { Boss, decode64 } from "universa-wasm";
+import { Boss, decode64 } from "unicrypto";
 
 /**
  * Unpack boss object from the base64 encoded string or binary array.

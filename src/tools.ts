@@ -1,6 +1,6 @@
 /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
 
-import {encode64, decode64} from 'universa-wasm'
+import {encode64, decode64} from 'unicrypto'
 
 /**
  * Awaitable timeout (yeah, again, reinventing the wheel every day).

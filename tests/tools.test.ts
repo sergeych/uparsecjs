@@ -1,5 +1,5 @@
 import { byteArrayToLong, decode64url, encode64url, longToByteArray, retry } from "../src/tools";
-import { decode64, encode64 } from "universa-wasm";
+import { decode64, encode64 } from "unicrypto";
 import { CompletablePromise } from "../src/CompletablePromise";
 import { Completable } from "../src/Completable";
 

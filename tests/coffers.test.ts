@@ -8,7 +8,7 @@ import { Passwords } from "../src/Passwords";
 import { utf8ToBytes } from "../src/tools";
 import { Coffer, CofferException, SerializedCoffer } from "../src/Coffer";
 import { UniversalKey, UniversalPasswordKey, UniversalPrivateKey, UniversalSymmetricKey } from "../src/UnversalKeys";
-import { decode64, encode58, PrivateKey } from "universa-wasm";
+import { decode64, encode58, PrivateKey } from "unicrypto";
 
 describe("Coffer", () => {
   async function testAvailable(serialized: SerializedCoffer, payload: Uint8Array | null, ...keys: UniversalKey[]) {

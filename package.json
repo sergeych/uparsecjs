@@ -1,5 +1,5 @@
 {
-  "name": "unicrypto",
+  "name": "parsecjs",
   "version": "0.0.1",
   "description": "Universa cryptolibrary, 4th generation primitives",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
@@ -20,7 +20,7 @@
     "fastestsmallesttextencoderdecoder": ">1.0.14",
     "isomorphic-fetch": "^2.2.1",
     "node-fetch": "^2.6.0",
-    "universa-wasm": ">=0.3.0"
+    "unicrypto": "^0.1.0"
   },
   "devDependencies": {
     "@babel/parser": "^7.9.6",

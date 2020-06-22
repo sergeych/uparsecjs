@@ -6,7 +6,7 @@ import {
   PublicKeyEncryptOpts,
   randomBytes,
   SymmetricKey
-} from "universa-wasm";
+} from "unicrypto";
 import { bossDump, bossLoad } from "./SimpleBoss";
 import { sha256 } from "./index";
 
