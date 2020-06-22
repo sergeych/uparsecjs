@@ -3,7 +3,7 @@
  * needed to keep and manage permanent Parsec sessions. Window.localStorage and Window.sessionStorage
  * comply.
  */
-import { Endpoint, IConnection, RootConnection } from "./Parsec";
+import { Endpoint, PConnection, RootConnection } from "./Parsec";
 import { ParsecNotIdentifiedException } from "./ParsecExceptions";
 import { CompletablePromise } from "./CompletablePromise";
 
@@ -45,14 +45,14 @@ export abstract class ParsecConnection {
 
   abstract get status(): ParsecConnecctionStatus;
 
-  private _rootConnection: IConnection;
+  private _rootConnection: PConnection;
   get rootConnection() { return this._rootConnection; }
 
-  protected identifiedConnection: IConnection | null;
+  protected identifiedConnection: PConnection | null;
 
   abstract async waitConnectionSatusChanged(): Promise<ParsecConnecctionStatus>;
 
-  protected constructor(rootConnection: IConnection) {
+  protected constructor(rootConnection: PConnection) {
     this._rootConnection = rootConnection;
   }
 }

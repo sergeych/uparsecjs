@@ -1,4 +1,4 @@
-import { IConnection, RootConnection } from "./Parsec";
+import { PConnection, RootConnection } from "./Parsec";
 import { Estimator } from "./Estimator";
 
 /**
@@ -7,7 +7,7 @@ import { Estimator } from "./Estimator";
  * like.
  */
 export class TimeService {
-  readonly #connection: IConnection;
+  readonly #connection: PConnection;
   readonly #shiftMillis: Promise<number>;
 
   readonly #eOffset = new Estimator();

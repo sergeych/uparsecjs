@@ -55,7 +55,7 @@ export class Command {
  * Interface to any parsec connection level, it is always the same despite of protection level.
  */
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface IConnection {
+export interface PConnection {
   /**
    * Execute remote api function
    * @param method name of the remote method to execute, e.g. 'requestLogin', 'version', etc.
@@ -72,7 +72,7 @@ export interface IConnection {
  * in turn should provide credentials to connect a secure {@linkt Endpoint}. Usually, this type of
  * connection is used to access API root, what explains the name.
  */
-export class RootConnection implements IConnection {
+export class RootConnection implements PConnection {
 
   readonly rootUri: string;
 
@@ -130,12 +130,12 @@ export class RootConnection implements IConnection {
  * or host authentication procedures. There could be nested endpoints too. Basically, Endpoint is just a
  * encrypted and authenticated version of {@link RootConnection}.
  */
-export class Endpoint implements IConnection {
+export class Endpoint implements PConnection {
   #authToken: string;
   #sessionKey: SymmetricKey;
-  connection: IConnection;
+  connection: PConnection;
 
-  constructor(connection: IConnection, params: { sessionKey: Uint8Array, authToken: string }) {
+  constructor(connection: PConnection, params: { sessionKey: Uint8Array, authToken: string }) {
     this.#authToken = params.authToken;
     this.#sessionKey = new SymmetricKey({ keyBytes: params.sessionKey });
     this.connection = connection;

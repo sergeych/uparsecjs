@@ -22,12 +22,10 @@ describe("Coffer", () => {
     try {
       await Coffer.load(serialized, ...keys);
       fail("coffer load must fail")
-    }
-    catch (e) {
-      if( e instanceof CofferException ) {
+    } catch (e) {
+      if (e instanceof CofferException) {
         // ok
-      }
-      else
+      } else
         fail(e)
     }
   }
@@ -110,12 +108,8 @@ describe("keyAddress", () => {
   it("has addresses for longer keys", async () => {
     for (const data of keyAddressVectors) {
       const key = await PrivateKey.unpack(decode64(data.packedKey));
-      // 8192 key is not yet ready
-      if (data.size == 8192) console.log("skipped 8192 keyAddress test")
-      else {
-        expect(encode58(key.publicKey.longAddress)).toBe(data.longAddressString);
-        expect(encode58(key.publicKey.shortAddress)).toBe(data.shortAddressString);
-      }
+      expect(encode58(key.publicKey.longAddress)).toBe(data.longAddressString);
+      expect(encode58(key.publicKey.shortAddress)).toBe(data.shortAddressString);
     }
   });
 });
