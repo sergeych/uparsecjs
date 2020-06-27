@@ -31,3 +31,9 @@ export async function sha256(data: Uint8Array | string) {
     data = utf8ToBytes(data)
   return await SHA.getDigest("sha256", data);
 }
+
+export async function sha3_384(data: Uint8Array | string) {
+  if( !(data instanceof Uint8Array) )
+    data = utf8ToBytes(data)
+  return await SHA.getDigest("sha3_384", data);
+}

@@ -1,6 +1,10 @@
 /**
  * The Promise that could explicitly be resolved or rejected by calling
  * its methods. Could be used as a regular promise.
+ *
+ * Note that "modified" system promise under V8 is much less effective than unaltered
+ * promise, that's why consider using {@link Completable} that perform better on frequent calls but
+ * can't be im-place replacement where the Promise is required or used.
  */
 export class CompletablePromise<T> implements Promise<T> {
 

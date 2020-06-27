@@ -1,6 +1,9 @@
 /**
- * The Promise that could explicitly be resolved or rejected by calling
- * its methods. Could be used as a regular promise.
+ * The wrapping that provides usual Promise that could explicitly be resolved or rejected by calling
+ * via Completable instance methods. Could be used as a regular promise.
+ *
+ * Unlike {@link CompletablePromise} it does not alter Promise itself so works faster when called
+ * frequently.
  */
 export class Completable<T>  {
 
