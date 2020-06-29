@@ -1,6 +1,6 @@
 /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
 
-import {encode64, decode64} from 'unicrypto'
+import { encode64, decode64 } from 'unicrypto'
 
 /**
  * Awaitable timeout (yeah, again, reinventing the wheel every day).
@@ -107,6 +107,11 @@ export function byteArrayToLong(byteArray: Uint8Array): number {
   return value;
 }
 
+/**
+ * encode binary data with the alternative base64 alphabet to be used in the URL/query without escaping
+ * @param data to encode
+ * @return encoded data as string
+ */
 export function encode64url(data: Uint8Array): string {
   let result = encode64(data)
     .replace(/\+/g, "-")
@@ -116,9 +121,21 @@ export function encode64url(data: Uint8Array): string {
   return result;
 }
 
+/**
+ * Decode urlencoded data, see {@link encode64url}.
+ * @param encodedString encoded data taken from URL (path or query)
+ * @return decoded binary data
+ */
 export function decode64url(encodedString: string): Uint8Array {
   const result = encodedString.replace(/-/g, "+").replace(/_/g, "/");
   // padding with = is actually not needed:
   // while(result.length % 4 != 0 ) result += '=';
   return decode64(result);
+}
+
+export function equalArrays<T>(a: ArrayLike<T>, b: ArrayLike<T>): boolean {
+  if (a.length != b.length) return false;
+  for(let i=0; i<a.length; i++)
+    if (a[i] != b[i]) return false;
+  return true;
 }

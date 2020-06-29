@@ -22,6 +22,32 @@ export class RemoteException extends ErrorCode {
 }
 
 /**
+ * Some minimal subset of Storage (like window.sessionStorage/localStorage
+ * needed to keep and manage permanent Parsec sessions. Window.localStorage and Window.sessionStorage
+ * comply.
+ */
+export interface ParsecSessionStorage {
+  /**
+   * Return item with the specifed key name or null.
+   * @param key
+   */
+  getItem(key: string): string | null;
+
+  /**
+   * Removes the key/value pair with the given key f  rom the list associated with the object, if a key/value pair with the given key exists.
+   */
+  removeItem(key: string): void;
+
+  /**
+   * Sets the value of the pair identified by key to value, creating a new key/value pair if none existed for key previously.
+   *
+   * Throws a "QuotaExceededError" DOMException exception if the new value couldn't be set. (Setting could fail if, e.g., the user has disabled storage for the site, or if the quota has been exceeded.)
+   */
+  setItem(key: string, value: string): void;
+}
+
+
+/**
  * Basic Parsec command and result utilities.
  */
 export class Command {
@@ -92,10 +118,10 @@ export class RootConnection implements PConnection {
   static traceCommands = false;
 
   async call(method: string, params: any = {}): Promise<any> {
-    if( RootConnection.traceCommands ) console.info(`>> ${method}:`, params);
+    if (RootConnection.traceCommands) console.info(`>> ${method}:`, params);
     const packedResult = await this.request(Command.pack(method, params));
     const result = Command.unpack(packedResult);
-    if( RootConnection.traceCommands ) console.info(`<< ${method}:`, result);
+    if (RootConnection.traceCommands) console.info(`<< ${method}:`, result);
     return result;
   }
 
@@ -141,7 +167,9 @@ export class Endpoint implements PConnection {
     this.connection = connection;
   }
 
-  serialize(): any { return {sessionKey: this.#sessionKey.pack(), authToken: this.#authToken}}
+  serialize(): any {
+    return { sessionKey: this.#sessionKey.pack(), authToken: this.#authToken }
+  }
 
   async call(method: string, params: any = {}): Promise<any> {
     const answer = await this.connection.call("cmd", {

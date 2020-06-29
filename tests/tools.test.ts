@@ -1,4 +1,4 @@
-import { byteArrayToLong, decode64url, encode64url, longToByteArray, retry } from "../src/tools";
+import { byteArrayToLong, decode64url, encode64url, equalArrays, longToByteArray, retry } from "../src/tools";
 import { decode64, encode64 } from "unicrypto";
 import { CompletablePromise } from "../src/CompletablePromise";
 import { Completable } from "../src/Completable";
@@ -85,15 +85,20 @@ it("runs completable promises", async () => {
   const waiter1 = new Completable();
   cf4.promise.finally(() => {
     waiter1.resolve();
-    console.log("finally fired");
   });
   cf4.reject(new Error("test=1"));
   await waiter1.promise;
   try {
     await cf4.promise;
-    fail("it sholud throw exception before");
+    fail("it should throw exception before");
   }
   catch(e) {
-    console.log("expected error",e);
   }
-})
+});
+
+it("compares arays", () => {
+  expect(equalArrays(Uint8Array.of(1,2,3),Uint8Array.of(1,2,3))).toBeTruthy();
+  expect(equalArrays(Uint8Array.of(1,2,3),Uint8Array.of(1,2,3,4))).toBeFalsy();
+  expect(equalArrays(Uint8Array.of(1,2,3,5),Uint8Array.of(1,2,3,4))).toBeFalsy();
+  expect(equalArrays(Uint8Array.of(1,2,3,4),Uint8Array.of(1,2,3,4))).toBeTruthy();
+});

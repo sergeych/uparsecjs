@@ -10,3 +10,4 @@ it("synchronizes time", async () => {
   const t = await ts.shiftMillis;
   expect(Math.abs(t)).toBeLessThan(20000);
 });
+
