@@ -41,10 +41,10 @@ export class BitMixer {
    * @param length
    */
   static async SolvePOW1(source: Uint8Array, length: number): Promise<Uint8Array> {
-    const buffer = Uint32Array.from([0,0,0]);
+    const buffer = Uint32Array.from([0,0]);
     let index = 0;
     const result = new Uint8Array(buffer.buffer);
-    while(index < 3) {
+    while(index < 2) {
       const sha = new SHA("sha3_384");
       await sha.put(source);
       await sha.put(result);

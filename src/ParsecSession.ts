@@ -1,5 +1,5 @@
 import { CachedValue } from "./CachedValue";
-import { decode64, encode64, PrivateKey, SignedRecord } from "unicrypto";
+import { decode64, encode64, PrivateKey, SignedRecord, SymmetricKey } from "unicrypto";
 import { bossDump, bossLoad } from "./SimpleBoss";
 import { randomBytes } from "crypto";
 import { equalArrays } from "./tools";
@@ -14,7 +14,7 @@ const storageKeySessionId = ".p1.SID";
 export interface POWTask1 {
   type: 1 | 2,
   length: number,
-  salt: Uint8Array
+  source: Uint8Array
 }
 
 export type POWTask = POWTask1;
@@ -23,7 +23,7 @@ export class POW {
   static async solve(task: POWTask): Promise<any> {
     switch (task.type) {
       case 1:
-        return { POWResult: await BitMixer.SolvePOW1(task.salt, task.length) };
+        return { POWResult: await BitMixer.SolvePOW1(task.source, task.length) };
       default:
         throw new ParsecAuthenticationException("unsupported POW task type: " + task.type);
     }
@@ -41,6 +41,7 @@ export class Session implements PConnection {
   private sessionEndpoint: Promise<Endpoint>;
   private sessionExpiresAt: null | Date;
   private readonly keyStrength: number;
+  private testMode: boolean;
 
   /**
    * Construct a session over a given root connection and using a given storage to keep session persistent.
@@ -53,12 +54,13 @@ export class Session implements PConnection {
    * @param keyStrength CSK strength for newly generated keys.
    */
   constructor(storage: ParsecSessionStorage, connection: PConnection,
-              serviceKeyAddresses: Uint8Array[], keyStrength = 4096) {
+              serviceKeyAddresses: Uint8Array[], testMode = false, keyStrength = 4096) {
     if (serviceKeyAddresses.length < 1) throw "need at least one service key address";
     this.keyStrength = keyStrength;
     this.serviceKeyAddresses = serviceKeyAddresses;
     this.connection = connection;
     this.storage = storage;
+    this.testMode = testMode;
     this.sessionEndpoint = this.connect();
   }
 
@@ -76,8 +78,16 @@ export class Session implements PConnection {
    * Get endpoint promise. The Session processor will automatically use necessary logic to get a session,
    * existing or new one unless there will be a network problem.
    */
-  get endpoint(): Promise<Endpoint> {
+  private get endpoint(): Promise<Endpoint> {
     return this.sessionEndpoint
+  }
+
+  /**
+   * Await connection. This is rarely need as using it as {@link PConnection} instance, e.g. with {@link call}
+   * automatically awaits for connection to be established.
+   */
+  public async ready(): Promise<void> {
+    await this.endpoint
   }
 
   /**
@@ -129,13 +139,13 @@ export class Session implements PConnection {
 
   private TSK: CachedValue<Uint8Array> = new CachedValue(() => {
     const sk = this.storage.getItem(storageKeyTSK);
-    return sk ? bossLoad(decode64(sk)) : null;
+    return sk ? decode64(sk) : null;
   });
 
   private async connect(): Promise<Endpoint> {
     if (this.TSK.isDefined()) {
       const sid = this.storage.getItem(storageKeySessionId);
-      if (sid) {
+      if (!sid) {
         console.debug("inconsistent TSK: no session id, dropping");
       } else {
         // we may be ok:
@@ -179,26 +189,44 @@ export class Session implements PConnection {
     const clientNonce = randomBytes(32);
     try {
       const result = await this.connection.call("createTSK", {
-        signedRecord: SignedRecord.packWithKey(
+        signedRecord: await SignedRecord.packWithKey(
           await this.SCK.value,
-          {},
+          {
+            clientNonce: clientNonce,
+            sessionId: this.storage.getItem(storageKeySessionId),
+            knownServiceKeys: this.serviceKeyAddresses,
+          },
           clientNonce
         )
       });
-      const esr = result.encryptedSignedRecord;
-      if (!esr) throw "invalid createTSK answer: " + JSON.stringify(result);
-      const sr = await SignedRecord.unpack(await (await this.SCK.value).decrypt(esr));
+      const signedResult = result.signedEncryptedResult;
+      if (!signedResult) throw "invalid createTSK answer: " + JSON.stringify(result);
+
+      const sr = await SignedRecord.unpack(signedResult);
+
       if (!equalArrays(sr.payload.clientNonce, clientNonce))
         throw new ParsecAuthenticationException("TSK creation failed: server has returned a wrong nonce");
-      this.TSK.clear();
-      this.storage.setItem(storageKeyTSK, encode64(sr.payload.TSK));
-      this.sessionExpiresAt = sr.payload.expiresAt;
-      console.debug("got a TSK, getting session for it");
-      return this.connect();
+
+      const signedAddress = sr.key.longAddress;
+      for (const a of this.serviceKeyAddresses) {
+        if (equalArrays(signedAddress, a)) {
+          console.debug("key service address found, decrypting TSK");
+          // now we have to decrypt payload:
+          const plainResult = bossLoad<any>(await (await this.SCK.value).decrypt(sr.payload.encryptedResult));
+          this.TSK.clear();
+          this.storage.setItem(storageKeyTSK, encode64(plainResult.TSK));
+          this.sessionExpiresAt = plainResult.TSKExpiresAt;
+          console.debug("got a TSK, restarting session for it");
+          return this.connect();
+        }
+      }
+      console.warn("provided ServiceKey is not known, need to rescan knwon keys");
     } catch (e) {
       if (e instanceof RemoteException) {
         console.debug("service rejected our SCK->TSK request: " + e.message + ", will reset SCK");
         this.storage.removeItem(storageKeySCK);
+        this.SCK.clear();
+        return this.generateNewSCK();
       } else throw e;
     }
     return null;
@@ -210,33 +238,29 @@ export class Session implements PConnection {
     this.SCK.clear();
     // generate and try to register new
     while (true) {
+      // this will be a new SCK:
       const sck = await PrivateKey.generate({ strength: this.keyStrength });
       try {
-        let result = await this.connection.call("requestSCK", { SCKAddress: sck.publicKey.longAddress });
-        const sr: Uint8Array = await SignedRecord.packWithKey(await this.SCK.value, {
-          POWResult: {
-            ...await POW.solve(result.POWTask),
-            serviceKeyAddresses: this.serviceKeyAddresses,
-          }
+        let result = await this.connection.call("requestSCK", {
+          SCKAddress: sck.publicKey.longAddress,
+          testMode: this.testMode
         });
+        // prepare POW solution:
+        console.debug("got SCK POWTask, calculating solution for length " + result.POWTask.length);
+        const sr: Uint8Array = await SignedRecord.packWithKey(sck, {
+          ...await POW.solve(result.POWTask)
+        });
+        console.debug("Registering new SCK key with solved POW")
         result = await this.connection.call("registerSCK", {
           context: result.context,
           signedRecord: sr
-        }) as { clientKeyAddress: Uint8Array, signedRecord: Uint8Array };
+        });
         // if we get there then everything is OK, but we need to check the signature
-        const answer = (await SignedRecord.unpack(result.signedRecord))
-        if (!equalArrays(answer.payload.clientKeyAddress, sck.publicKey.longAddress))
-          throw new ParsecAuthenticationException("bad answer")
-        const signedAddress = answer.key.publicKey.longAddress;
-        for (const a of this.serviceKeyAddresses) {
-          if (equalArrays(signedAddress, a)) {
             // check passed, we can use new key, save and use it
             this.storage.setItem(storageKeySCK, encode64(bossDump(await sck.pack())));
+            this.storage.setItem(storageKeySessionId, result.sessionId);
             this.SCK.clear();
             return this.connectWithSCK();
-          }
-        }
-        throw new ParsecAuthenticationException("can't authenticate the service");
       } catch (e) {
         if (e instanceof RemoteException)
           console.warn("service has rejected our key: " + e.message);

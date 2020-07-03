@@ -2,6 +2,7 @@ import { byteArrayToLong, decode64url, encode64url, equalArrays, longToByteArray
 import { decode64, encode64 } from "unicrypto";
 import { CompletablePromise } from "../src/CompletablePromise";
 import { Completable } from "../src/Completable";
+import { type } from "os";
 
 it("retry OK", async () => {
   let count = 0;
