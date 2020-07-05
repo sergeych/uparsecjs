@@ -18,7 +18,4 @@ export class CachedValue<T extends any | null> {
     return this.#cachedValue;
   }
 
-  isDefined() { return this.value != null; }
-
-  isEmpty() { return !this.isDefined(); }
 }

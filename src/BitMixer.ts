@@ -54,5 +54,6 @@ export class BitMixer {
       if( buffer[index]++ == 0xFFFFffff )
         index++;
     }
+    return result;
   }
 }

@@ -81,7 +81,7 @@ export function bytesToUtf8(bytes: Uint8Array): string {
  */
 export function longToByteArray(longNumber: number): Uint8Array {
   if (longNumber == 0) return Uint8Array.of(0);
-  const byteArray = [];
+  const byteArray = Array<number>();
   while (longNumber > 0) {
     const byte = longNumber & 0xff;
     byteArray.push(byte);
