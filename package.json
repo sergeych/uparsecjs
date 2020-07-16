@@ -1,7 +1,7 @@
 {
-  "name": "parsecjs",
-  "version": "0.0.1",
-  "description": "Universa cryptolibrary, 4th generation primitives",
+  "name": "uparsecjs",
+  "version": "0.0.1-beta.0",
+  "description": "Universa Parsec & tools, 4th generation primitives",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
   "license": "MIT",
   "main": "dist/index.js",

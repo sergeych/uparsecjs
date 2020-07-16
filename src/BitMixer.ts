@@ -46,8 +46,8 @@ export class BitMixer {
     const result = new Uint8Array(buffer.buffer);
     while(index < 2) {
       const sha = new SHA("sha3_384");
-      await sha.put(source);
       await sha.put(result);
+      await sha.put(source);
       const s = await sha.get("bin");
       if( this.countZeroes(s) == length )
         return result;
