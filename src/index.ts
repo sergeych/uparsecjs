@@ -1,3 +1,5 @@
+export * from "./SimpleBoss";
+export { CompletablePromise } from "./CompletablePromise"
 
 import { utf8ToBytes } from "./tools";
 
