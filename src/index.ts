@@ -1,10 +1,5 @@
 
-// version 0.1* were minicrypto-js based, e,g, sync and sometimes too blocking
-// library based in forge which uses not trusty in some cases browser crypto extensions
-// that tends to generate weak keys.
 import { utf8ToBytes } from "./tools";
-
-export const CORE_VERSION = "0.2.0";
 
 /**
  * Simple compare semver version strings.
