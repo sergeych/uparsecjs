@@ -1,11 +1,13 @@
 {
   "name": "uparsecjs",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.1-beta.4",
   "description": "Universa Parsec & tools, 4th generation primitives",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
   "license": "MIT",
   "main": "dist/index.js",
-  "files”": ["dist/**/*"],
+  "files”": [
+    "dist/**/*"
+  ],
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
