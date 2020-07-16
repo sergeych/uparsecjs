@@ -534,15 +534,15 @@ export class UniversalPasswordKey extends UniversalKey {
 
 
   async decrypt(ciphertext: Uint8Array) {
-    return await (await this.key).etaDecrypt(ciphertext);
+    return await (await this.key)!.etaDecrypt(ciphertext);
   }
 
   get symmetricKey(): Promise<SymmetricKey> {
-    return this.key;
+    return this.key!;
   }
 
   async encrypt(plaintext: Uint8Array) {
-    return await (await this.key).etaEncrypt(plaintext);
+    return await (await this.key)!.etaEncrypt(plaintext);
   }
 
   async waitDerived() {
@@ -554,7 +554,7 @@ export class UniversalPasswordKey extends UniversalKey {
     await this.waitDerived();
     return {
       tag: this.tag,
-      packedKey: (await this.key).pack()
+      packedKey: (await this.key)!.pack()
     };
   }
 
@@ -574,9 +574,9 @@ export class UniversalPasswordKey extends UniversalKey {
   ): Promise<UniversalPasswordKey[]> {
     const o = { ...defaultPKDOptions, ...options, keySize: 32 };
     const opts = { ...o, kdfLength: 32 * count + o.idLength };
-    const keys = [];
+    const keys = new Array<UniversalPasswordKey>();
     for (let i = 0; i < count; i++) {
-      // we want to avoid unneccessary recalculations in parallel threads. to make cache
+      // we want to avoid unnecessary recalculations in parallel threads. to make cache
       // work we should not start KDF in parallel (what constructor actually does). So
       // constructor start derivation:
       const k = await UniversalPasswordKey.deriveFrom(password, {
@@ -598,7 +598,7 @@ export class UniversalKeys {
   /**
    * Load from serialized object. {@linkcode UniversalKey.serialize}
    *
-   * @param serialized object (key-value) holding serialized key or boss-packedb inary.
+   * @param source object (key-value) holding serialized key or boss-packed binary.
    */
   static async loadFrom(source: Uint8Array | SerializedUniversalKey): Promise<UniversalKey> {
     const serialized: SerializedUniversalKey =

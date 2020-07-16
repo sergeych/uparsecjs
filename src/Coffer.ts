@@ -224,7 +224,7 @@ export class Coffer {
       let data = this._payload ?
         [1, this._payload, randomBytes(Math.random() * 17)] :
         [0, randomBytes(Math.random() * 37)];
-      this._preparedPayload = await this.innerKey.etaEncrypt(new Boss().dump(data));
+      this._preparedPayload = await this.innerKey!.etaEncrypt(new Boss().dump(data));
     }
     return {
       innerKeyRecords: Array.from(this.innerKeyRecords.values()),
@@ -246,7 +246,7 @@ export class Coffer {
       else {
         this.innerKeyRecords.set(key, {
           tag: k.tag,
-          encryptedKey: await k.encrypt(this.packedInnerKey)
+          encryptedKey: await k.encrypt(this.packedInnerKey!)
         });
         this._isDirty = true;
       }

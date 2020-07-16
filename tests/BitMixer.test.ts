@@ -41,7 +41,7 @@ describe("BitMixer", () => {
     const bitLength = 11;
     const src = new Uint8Array([1,2,3]);
     const res = await BitMixer.SolvePOW1(src, bitLength);
-    expect(BitMixer.countZeroes(await sha3_384(new Uint8Array([...src,...res]))))
+    expect(BitMixer.countZeroes(await sha3_384(new Uint8Array([...res,...src]))))
       .toBe(bitLength);
   });
 

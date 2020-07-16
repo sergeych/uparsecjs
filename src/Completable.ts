@@ -57,10 +57,10 @@ export class Completable<T>  {
    * so check it state first.
    */
   get result(): T {
-    if( !this.#isCompleted )
-      throw "not completed";
     if( !this.#isResolved )
       throw "promise rejected";
+    if( !this.#isCompleted || !this.#result)
+      throw "not completed";
     return this.#result;
   }
 
