@@ -141,4 +141,4 @@ it("pack to text", async () => {
   expect(po.fileName).toBe('testkey.public.unikey');
   expect(po.packed.length).toBe(packed.length);
   expect(po.packed).toStrictEqual(packed);
-})
+});

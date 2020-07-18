@@ -6,7 +6,6 @@ import { ArgumentParser } from 'argparse';
 import * as path from "path";
 import { guessUniversaObjectType, UniversaTextObjectFormatter, UniversaTextObjectParser, EmbeddedTextObject } from "../text_tools";
 import { bytesToUtf8 } from "../tools";
-import { file } from "@babel/types";
 
 const fs = require('fs').promises;
 
@@ -15,27 +14,31 @@ const fs = require('fs').promises;
     const parser = new ArgumentParser({
       version: '0.0.1',
       addHelp: true,
-      description: 'uni2text utility converts some Universa binary objects to text and back.'
+      description: `
+        uni2text utility converts some Universa binary objects to text and back. When packing binary objects
+        to text files, it process a single file. When unpacking from text file, it extracts all object found in it.
+        Conflicting file names are resolved by adding _(count) tp its name. note that if neigher -t nor -b flag is 
+        specified, the conversion direction will be selected by aalysing source file type.`
     });
 
     parser.addArgument('source', {
-      help: 'source file, could be binary or text file'
+      help: 'source file, could be binary or text file. required.'
     });
 
     parser.addArgument('dest', {
-      help: 'destination file, if omitted, will be extracted from the contents or derived from the source name depending on the operation',
+      help: 'destination file, optional, will be extracted from the contents or derived from the source name depending on the operation',
       nargs: '?',
       required: false
     })
 
     parser.addArgument(['-b', '--binary'], {
       action: 'storeTrue',
-      help: 'explicitly extract binary from source text'
+      help: 'explicitly extract binary from source text.'
     })
 
     parser.addArgument(['-t', '--text'], {
       action: 'storeTrue',
-      help: "explicitly convert binary source file to the text representation"
+      help: "explicitly convert binary source file to the embedded text object."
     });
 
     parser.addArgument("--type", {
@@ -44,14 +47,11 @@ const fs = require('fs').promises;
     });
 
     parser.addArgument("--fileName", {
-      help: "when converting binary to text, overrides fileName field"
+      help: "when converting binary to text, overrides fileName field."
     })
 
-
-    // { help: "convert text representation to binary"}
-// );
     const args = parser.parseArgs();
-    console.log(args)
+    // console.log(args)
 
     const source = new Uint8Array(await fs.readFile(args.source));
 
@@ -93,6 +93,9 @@ const fs = require('fs').promises;
           }
       }
     }
+    // when specifying explicitly -t the type might need to be guessed
+    if( !args.type ) args.type = await guessUniversaObjectType(source);
+
     if (!args.dest && args.text) {
       args.dest = path.basename(args.source) + ".txt";
     }
@@ -109,6 +112,7 @@ const fs = require('fs').promises;
       if( args.fileName )
         throw "can't override fileName while processing TEXT file (this is only valid when packing binary to text)";
       if( !objects ) objects = await new UniversaTextObjectParser(bytesToUtf8(source)).objects;
+      if( objects.length == 0 ) throw `no embedded text objects found in ${args.source}`
       for( const eo of objects) {
         if( eo.errors.length > 0) {
           console.error(`Bad embedded object found in lines ${eo.firstLine}-${eo.lastLine}: ${eo.errors.join(", ")}`);
