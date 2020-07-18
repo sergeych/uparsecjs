@@ -21,9 +21,10 @@
     "test": "jest --coverage"
   },
   "bin": {
-    "uencrypt": "dist/cli/uencrypt.js"
+    "uni2text": "dist/cli/uni2text.js"
   },
   "dependencies": {
+    "argparse": "^1.0.10",
     "fastestsmallesttextencoderdecoder": ">1.0.14",
     "isomorphic-fetch": "^2.2.1",
     "node-fetch": "^2.6.0",

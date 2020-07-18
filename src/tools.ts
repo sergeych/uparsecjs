@@ -40,7 +40,7 @@ export async function retry<T>(
 
 // nodejs polyfill
 /* istanbul ignore next */
-if (!window.TextDecoder || !window.TextEncoder) {
+if (typeof(window) != 'undefined' && (!window.TextDecoder || !window.TextEncoder)) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const {
     TextEncoder,
@@ -139,3 +139,4 @@ export function equalArrays<T>(a: ArrayLike<T>, b: ArrayLike<T>): boolean {
     if (a[i] != b[i]) return false;
   return true;
 }
+

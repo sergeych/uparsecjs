@@ -1,8 +1,15 @@
-import { byteArrayToLong, decode64url, encode64url, equalArrays, longToByteArray, retry } from "../src/tools";
-import { decode64, encode64 } from "unicrypto";
-import { CompletablePromise } from "../src/CompletablePromise";
+import {
+  byteArrayToLong,
+  decode64url,
+  encode64url,
+  equalArrays,
+  longToByteArray,
+  retry,
+  utf8ToBytes
+} from "../src/tools";
+import { decode64, PrivateKey } from "unicrypto";
 import { Completable } from "../src/Completable";
-import { type } from "os";
+import { guessUniversaObjectType, UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
 
 it("retry OK", async () => {
   let count = 0;
@@ -103,3 +110,35 @@ it("compares arays", () => {
   expect(equalArrays(Uint8Array.of(1,2,3,5),Uint8Array.of(1,2,3,4))).toBeFalsy();
   expect(equalArrays(Uint8Array.of(1,2,3,4),Uint8Array.of(1,2,3,4))).toBeTruthy();
 });
+
+const key1 = PrivateKey.generate({strength: 2048});
+
+it("pack to text", async () => {
+  const k1 = await key1;
+  // const packed = new Uint8Array(randomBytes(517));
+  const packed = await k1.publicKey.pack();
+  const text = await UniversaTextObjectFormatter.format({
+    packed: packed,
+    type: "public key",
+    fileName: "testkey.public.unikey",
+    comment: "lorem ipsum"
+  });
+  const text2 = "Foobar buzz\n"+text+"buuz bar foo";
+  // console.log("packed:\n\n"+text2);
+
+  // const objects = extractUniversaObjectText(text2)
+  const parser = new UniversaTextObjectParser(text2);
+  const result = await parser.objects;
+  // console.log(await parser.objects);
+  expect(result.length).toBe(1);
+  const r = result[0];
+  expect(r.firstLine).toBe(1);
+  expect(r.lastLine).toBe(12);
+  expect(r.errors.length).toBe(0);
+  const po = r.packedObject!
+  expect(po.width).toBe(80);
+  expect(po.type).toBe('public key');
+  expect(po.fileName).toBe('testkey.public.unikey');
+  expect(po.packed.length).toBe(packed.length);
+  expect(po.packed).toStrictEqual(packed);
+})
