@@ -220,6 +220,11 @@ export class UniversaTextObjectParser {
   }
 }
 
+/**
+ * Tries to determine type of the packed universa binary object by investigating its contents.
+ *
+ * @param packed, see {@link PackedObjectType}
+ */
 export async function guessUniversaObjectType(packed: Uint8Array): Promise<PackedObjectType> {
   try {
     const data: any = bossLoad(packed);
