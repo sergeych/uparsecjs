@@ -197,7 +197,7 @@ export class Coffer {
 
       this.innerKey = new SymmetricKey({ keyBytes: await key.decrypt(keyRecord.encryptedKey) });
       this._preparedPayload = serialized.payload;
-      const data = new Boss().load(await this.innerKey.decrypt(serialized.payload)) as any[];
+      const data = Boss.load(await this.innerKey.decrypt(serialized.payload)) as any[];
       this._payload = data[0] == 0 ? null : data[1] as Uint8Array;
     } else {
       // new Coffer, generating random key
@@ -224,7 +224,7 @@ export class Coffer {
       let data = this._payload ?
         [1, this._payload, randomBytes(Math.random() * 17)] :
         [0, randomBytes(Math.random() * 37)];
-      this._preparedPayload = await this.innerKey!.etaEncrypt(new Boss().dump(data));
+      this._preparedPayload = await this.innerKey!.etaEncrypt(Boss.dump(data));
     }
     return {
       innerKeyRecords: Array.from(this.innerKeyRecords.values()),
@@ -260,7 +260,7 @@ export class Coffer {
    */
   async pack(): Promise<Uint8Array> {
     if (!this.cachedPack || this._isDirty) {
-      this.cachedPack = new Boss().dump(await this.serialize());
+      this.cachedPack = Boss.dump(await this.serialize());
       this._isDirty = false;
     }
     return this.cachedPack;
@@ -295,7 +295,7 @@ export class Coffer {
    * @throws CofferException if the coffer could not be unpacked with presented keys, is broken and so on.
    */
   static async unpack(packed: Uint8Array, ...keys: (UniversalKey | string)[]): Promise<Coffer> {
-    return await new Coffer().setup(new Boss().load(packed) as SerializedCoffer, ...keys);
+    return await new Coffer().setup(Boss.load(packed) as SerializedCoffer, ...keys);
   }
 
   /**

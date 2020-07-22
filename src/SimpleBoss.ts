@@ -6,7 +6,7 @@ import { Boss, decode64 } from "unicrypto";
  */
 export function bossLoad<T>(data: Uint8Array | string) {
   const src = data instanceof Uint8Array ? data : decode64(data);
-  return (new Boss().load(src)) as T;
+  return (Boss.load(src)) as T;
 }
 
 /**
@@ -14,5 +14,5 @@ export function bossLoad<T>(data: Uint8Array | string) {
  * @param data
  */
 export function bossDump(data: any): Uint8Array {
-  return new Boss().dump(data)
+  return Boss.dump(data)
 }

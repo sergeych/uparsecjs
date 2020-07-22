@@ -34,7 +34,7 @@ const testServiceKeyAddress = decode64("EMbhPh0J22t0EfITdXOhHnB2HKW9oBqxsIbWU7iB
 const rc = new RootConnection("http://localhost:8094/api/p1");
 
 const tk = (async()=>{return PrivateKey.generate({strength: 2048})})();
-const tkAddress = tk.then((k) => k.publicKey.longAddress)
+const tkAddress = tk.then((k) => k.publicKey.longAddress.bytes)
 
 it("test service contains 1.1 in test mode",async () => {
   const info = await rc.call("info")

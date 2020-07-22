@@ -108,8 +108,8 @@ describe("keyAddress", () => {
   it("has addresses for longer keys", async () => {
     for (const data of keyAddressVectors) {
       const key = await PrivateKey.unpack(decode64(data.packedKey));
-      expect(encode58(key.publicKey.longAddress)).toBe(data.longAddressString);
-      expect(encode58(key.publicKey.shortAddress)).toBe(data.shortAddressString);
+      expect(encode58(key.publicKey.longAddress.bytes)).toBe(data.longAddressString);
+      expect(encode58(key.publicKey.shortAddress.bytes)).toBe(data.shortAddressString);
     }
   });
 });

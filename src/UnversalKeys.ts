@@ -311,7 +311,7 @@ export class UniversalPrivateKey extends UniversalKey {
     this.privateKey = privateKey;
     this.options = { ...this.options, ...options };
     this.publicKey = this.privateKey.publicKey;
-    this.tag = { type: "private", id: this.publicKey.longAddress };
+    this.tag = { type: "private", id: this.publicKey.longAddress.bytes };
   }
 
   readonly tag: UniversalKeyTag;

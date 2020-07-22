@@ -253,7 +253,7 @@ export class Session implements PConnection {
       if (!equalArrays(sr.payload.clientNonce, clientNonce))
         throw new ParsecAuthenticationException("TSK creation failed: server has returned a wrong nonce");
 
-      const signedAddress = sr.key.longAddress;
+      const signedAddress = sr.key.longAddress.bytes;
       this.tskGenerationCount++;
       for (const a of await this.serviceKeyAddresses.value) {
         if (equalArrays(signedAddress, a)) {
@@ -291,7 +291,7 @@ export class Session implements PConnection {
       const sck = await PrivateKey.generate({ strength: this.keyStrength });
       try {
         let result = await this.connection.call("requestSCK", {
-          SCKAddress: sck.publicKey.longAddress,
+          SCKAddress: sck.publicKey.longAddress.bytes,
           testMode: this.testMode
         });
         // prepare POW solution:
