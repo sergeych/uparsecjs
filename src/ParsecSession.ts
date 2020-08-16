@@ -15,7 +15,7 @@ const storageKeyTSK = ".p1.TSK";
 const storageKeySessionId = ".p1.SID";
 
 export interface POWTask1 {
-  type: 1 | 2,
+  type: number,
   length: number,
   source: Uint8Array
 }
