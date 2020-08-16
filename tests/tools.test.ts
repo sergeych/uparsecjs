@@ -1,5 +1,5 @@
 import {
-  byteArrayToLong,
+  byteArrayToLong, concatenateBinary,
   decode64url,
   encode64url,
   equalArrays,
@@ -7,15 +7,16 @@ import {
   retry,
   utf8ToBytes
 } from "../src/tools";
-import { decode64, PrivateKey } from "unicrypto";
+import { Boss, decode64, PrivateKey } from "unicrypto";
 import { Completable } from "../src/Completable";
 import { guessUniversaObjectType, UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
+import { randomBytes } from "crypto";
 
 it("retry OK", async () => {
   let count = 0;
   let result = await retry(5, 10, () => {
     count++;
-    if( count < 3 ) throw "too low";
+    if (count < 3) throw "too low";
     return "OK";
   });
   expect(result).toBe("OK");
@@ -26,7 +27,7 @@ it("retry inner async OK", async () => {
   let count = 0;
   let result = await retry(5, 10, async () => {
     count++;
-    if( count < 3 ) throw "too low";
+    if (count < 3) throw "too low";
     return "OK";
   });
   expect(result).toBe("OK");
@@ -36,19 +37,19 @@ it("retry inner async OK", async () => {
 it("retry FAIL", async () => {
   let count = 0;
   await expect(retry(5, 10, () => {
-      count++;
-      if( count < 33 ) throw "too low";
-      return "OK";
-    })).rejects.toEqual("too low");
+    count++;
+    if (count < 33) throw "too low";
+    return "OK";
+  })).rejects.toEqual("too low");
   expect(count).toBe(5);
 })
 
-it("converts longs to byte arrays", () =>{
+it("converts longs to byte arrays", () => {
   expect(longToByteArray(1)).toStrictEqual(Uint8Array.of(1));
   expect(longToByteArray(0xFFffFFfe)).toStrictEqual(Uint8Array.of(255, 255, 255, 254));
   expect(longToByteArray(0)).toStrictEqual(Uint8Array.of(0));
-  expect(byteArrayToLong(Uint8Array.of(1,2))).toBe(258);
-  expect(byteArrayToLong(Uint8Array.of(2,1))).toBe(513);
+  expect(byteArrayToLong(Uint8Array.of(1, 2))).toBe(258);
+  expect(byteArrayToLong(Uint8Array.of(2, 1))).toBe(513);
 });
 
 it("de/encodes URLs", () => {
@@ -73,8 +74,8 @@ it("runs completable promises", async () => {
   let result = "bad";
   // cf2.then(() => { fail("it should not call then") } )
   cf2.promise.catch((e) => {
-      result = e
-    })
+    result = e
+  })
     .finally(() => {
       expect(result).toBe("bar");
       expect(cf2.isCompleted).toBeTruthy();
@@ -86,7 +87,9 @@ it("runs completable promises", async () => {
     })
   const cf3 = new Completable();
   cf3.resolve();
-  expect(() => { cf3.reject()}).toThrow("already completed");
+  expect(() => {
+    cf3.reject()
+  }).toThrow("already completed");
 
   // strangely it does not wait
   const cf4 = new Completable();
@@ -99,19 +102,18 @@ it("runs completable promises", async () => {
   try {
     await cf4.promise;
     fail("it should throw exception before");
-  }
-  catch(e) {
+  } catch (e) {
   }
 });
 
 it("compares arays", () => {
-  expect(equalArrays(Uint8Array.of(1,2,3),Uint8Array.of(1,2,3))).toBeTruthy();
-  expect(equalArrays(Uint8Array.of(1,2,3),Uint8Array.of(1,2,3,4))).toBeFalsy();
-  expect(equalArrays(Uint8Array.of(1,2,3,5),Uint8Array.of(1,2,3,4))).toBeFalsy();
-  expect(equalArrays(Uint8Array.of(1,2,3,4),Uint8Array.of(1,2,3,4))).toBeTruthy();
+  expect(equalArrays(Uint8Array.of(1, 2, 3), Uint8Array.of(1, 2, 3))).toBeTruthy();
+  expect(equalArrays(Uint8Array.of(1, 2, 3), Uint8Array.of(1, 2, 3, 4))).toBeFalsy();
+  expect(equalArrays(Uint8Array.of(1, 2, 3, 5), Uint8Array.of(1, 2, 3, 4))).toBeFalsy();
+  expect(equalArrays(Uint8Array.of(1, 2, 3, 4), Uint8Array.of(1, 2, 3, 4))).toBeTruthy();
 });
 
-const key1 = PrivateKey.generate({strength: 2048});
+const key1 = PrivateKey.generate({ strength: 2048 });
 
 it("pack to text", async () => {
   const k1 = await key1;
@@ -123,7 +125,7 @@ it("pack to text", async () => {
     fileName: "testkey.public.unikey",
     comment: "lorem ipsum"
   });
-  const text2 = "Foobar buzz\n"+text+"buuz bar foo";
+  const text2 = "Foobar buzz\n" + text + "buuz bar foo";
   // console.log("packed:\n\n"+text2);
 
   // const objects = extractUniversaObjectText(text2)
@@ -142,3 +144,36 @@ it("pack to text", async () => {
   expect(po.packed.length).toBe(packed.length);
   expect(po.packed).toStrictEqual(packed);
 });
+
+it("concatenates binaries", () => {
+  const a = Uint8Array.of(1,2,3);
+  const b = Uint8Array.of(10,20,30,40);
+  const c = Uint8Array.of(4,5);
+  const abc = concatenateBinary(a,b,c);
+  expect(abc).toStrictEqual(Uint8Array.of(1,2,3, 10, 20, 30, 40, 4, 5));
+});
+
+
+// const fs = require("fs").promises
+//
+// it("packs uupacks", async () => {
+//   console.log("!11")
+//   const w = new Boss.Writer;
+//   const tag = "UCheckBook";
+//   w.write(tag)
+//   w.write({
+//     __type: tag,
+//     network: "mainnet",
+//     key: {
+//       __type: "UnencryptedPrivateKey",
+//       packed: randomBytes(30),
+//     },
+//     contract: {
+//       // this is U contract!
+//       __type: "UniversaContract",
+//       packed: randomBytes(30),
+//     }
+//   });
+//   const result = w.get();
+//   await fs.writeFile("sample.unicheck", result);
+// });

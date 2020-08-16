@@ -1,4 +1,4 @@
-import { decode64, encode64, PrivateKey, SignedRecord } from "unicrypto";
+import { decode64, encode64, PrivateKey, SHA, SignedRecord } from "unicrypto";
 import { bossLoad } from "./SimpleBoss";
 import { randomBytes } from "crypto";
 import { equalArrays } from "./tools";
@@ -44,11 +44,39 @@ class KeyAddressProvider {
   }
 }
 
+/**
+ * Parsec POW tools
+ */
 export class POW {
-  static async solve(task: POWTask): Promise<any> {
+  /**
+   * Solve valid POW task and return result.
+   *
+   * @param task
+   */
+  static async solve(task: POWTask): Promise<Uint8Array> {
     switch (task.type) {
       case 1:
-        return { POWResult: await BitMixer.SolvePOW1(task.source, task.length) };
+        return await BitMixer.SolvePOW1(task.source, task.length);
+      default:
+        throw new ParsecAuthenticationException("unsupported POW task type: " + task.type);
+    }
+  }
+
+  /**
+   * Check POW solution. This is by orders of magnitude faster than solving it. The result could
+   * be obtained by {@link solve}
+   *
+   * @param task that expected to be solved
+   * @param solution solution to check.
+   */
+  static async check(task: POWTask,solution: Uint8Array): Promise<Boolean> {
+    switch (task.type) {
+      case 1:
+        const sha = new SHA("sha3_384");
+        await sha.put(solution);
+        await sha.put(task.source);
+        const s = await sha.get();
+        return BitMixer.countZeroes(s) == task.length;
       default:
         throw new ParsecAuthenticationException("unsupported POW task type: " + task.type);
     }
@@ -297,7 +325,7 @@ export class Session implements PConnection {
         // prepare POW solution:
         console.debug("got SCK POWTask, calculating solution for length " + result.POWTask.length);
         const sr: Uint8Array = await SignedRecord.packWithKey(sck, {
-          ...await POW.solve(result.POWTask)
+          POWResult: await POW.solve(result.POWTask)
         });
         console.debug("Registering new SCK key with solved POW")
         result = await this.connection.call("registerSCK", {

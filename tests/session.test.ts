@@ -2,8 +2,9 @@ import { ParsecSessionStorage, RootConnection } from "../src/Parsec";
 
 import 'isomorphic-fetch'
 import { decode64, PrivateKey } from "unicrypto";
-import { POW, Session } from "../src/ParsecSession";
+import { POW, POWTask, Session } from "../src/ParsecSession";
 import { CachedStoredValue } from "../src/CachedStoredValue";
+import { utf8ToBytes } from "../src";
 window.fetch = require('node-fetch');
 window.FormData = require('form-data');
 
@@ -41,6 +42,14 @@ it("test service contains 1.1 in test mode",async () => {
   expect(info.parsecVersions).toContain("1.1")
   // TODO: check service know test key address and support test mode
 })
+
+it("checks POW", async () => {
+  const task = {type: 1,length: 4, source: utf8ToBytes("foobar")} as POWTask;
+  const solution = await POW.solve(task)
+  console.log(":: ",solution)
+  expect(await POW.check(task, solution)).toBeTruthy();
+  expect(await POW.check(task, solution.slice(1))).toBeFalsy();
+});
 
 it("requests SCK", async () => {
 

@@ -140,3 +140,30 @@ export function equalArrays<T>(a: ArrayLike<T>, b: ArrayLike<T>): boolean {
   return true;
 }
 
+function equalSets<T>(a: Set<T>,b: Set<T>): boolean {
+  return a.size == b.size && ([...a].every((x) => b.has(x)));
+}
+
+/**
+ * Sum elements of the array.
+ * @param src elements to summarize
+ */
+export function sumOf(src: number[]): number {
+  return src.reduce((a,b) => a + b)
+}
+
+/**
+ * Create new Uint8Array containing all source arrays in the order of appearance
+ * @param src parts to concatenate
+ */
+export function concatenateBinary(...src: Uint8Array[]): Uint8Array {
+  let offset = 0;
+  const result = new Uint8Array(sumOf(src.map(x=>x.length)));
+
+  for( const x of src) {
+    result.set(x, offset);
+    offset += x.length;
+  }
+  return result;
+}
+
