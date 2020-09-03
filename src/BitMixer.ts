@@ -54,6 +54,6 @@ export class BitMixer {
       if( buffer[index]++ == 0xFFFFffff )
         index++;
     }
-    return result;
+    throw Error("failed to solve POW1 of length "+length)
   }
 }

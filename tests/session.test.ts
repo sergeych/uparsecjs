@@ -97,3 +97,8 @@ it("re/connects", async() => {
   console.log(await session3.call("info"));
 });
 
+it("pings remote", async () => {
+  const rc = new RootConnection("https://api.myonly.cloud/api/p0")
+  const res = await rc.call("time")
+  expect(typeof res.time).toBe("number")
+});

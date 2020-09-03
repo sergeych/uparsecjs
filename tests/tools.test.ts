@@ -7,10 +7,11 @@ import {
   retry,
   utf8ToBytes
 } from "../src/tools";
-import { Boss, decode64, PrivateKey } from "unicrypto";
+import { Boss, bytesToHex, decode64, PrivateKey, SHA } from "unicrypto";
 import { Completable } from "../src/Completable";
 import { guessUniversaObjectType, UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
 import { randomBytes } from "crypto";
+import { sha256 } from "../src";
 
 it("retry OK", async () => {
   let count = 0;
@@ -153,6 +154,12 @@ it("concatenates binaries", () => {
   expect(abc).toStrictEqual(Uint8Array.of(1,2,3, 10, 20, 30, 40, 4, 5));
 });
 
+it("runs sha shortcut", async() => {
+  const source = utf8ToBytes("foobarbuz");
+  const d = await sha256(source)
+  expect(d).toStrictEqual(await SHA.getDigest("sha256", source));
+  expect(bytesToHex(d)).toBe("79b341c82b49b83fe15f37e710f64f94d77a26d8483047e993ebce326edf8d5e");
+});
 
 // const fs = require("fs").promises
 //
