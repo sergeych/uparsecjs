@@ -21,8 +21,6 @@ export class RemoteException extends ErrorCode {
   }
 }
 
-console.log(`Fetch polyfilling mode check: isNode=${isNode}`)
-
 const portableFetch = isNode ? require('node-fetch') : window.fetch;
 
 /**
