@@ -22,12 +22,25 @@ export interface POWTask1 {
 
 export type POWTask = POWTask1;
 
+/**
+ * The async callback that should obtain and return, or refresh and return list of known service addresses.
+ * The real addresses could be, for example, extracted from some Universa contract or obtained from UNS2
+ * network-stored contract, provided by the service itself and so on. This is becaise parsec 1.x allows
+ * 3 ways of checking service address: pre-shared address, pre-shared serivce contract origin or UNS2 name, and
+ * this library should work with all 3. See parsec papers in kb for more.
+ *
+ * @param refresh callers sets it to true to request refreshing known addresses from external srouces where
+ *                applicable. Generally it means that the reported addresses do not match and the service
+ *                might have published updated serivce contract
+ */
+type ServiceKeyAddressesProvider = (refresh: boolean) => Promise<Uint8Array[]>;
+
 class KeyAddressProvider {
 
   private cached: undefined | Promise<Uint8Array[]>;
   private requestRefresh = false;
 
-  constructor( private provider: (boolean) => Promise<Uint8Array[]>) {
+  constructor( private provider: ServiceKeyAddressesProvider) {
   }
 
   get value(): Promise<Uint8Array[]> {
@@ -116,8 +129,11 @@ export class Session implements PConnection {
    * @param testMode test session: functionality could be limited to unit testing only
    * @param keyStrength CSK strength for newly generated keys.
    */
-  constructor(storage: ParsecSessionStorage, connection: PConnection,
-              serviceKeyAddressesProvider: (bool) => Promise<Uint8Array[]>, testMode = false, keyStrength = 4096) {
+  constructor(storage: ParsecSessionStorage,
+              connection: PConnection,
+              serviceKeyAddressesProvider: ServiceKeyAddressesProvider,
+              testMode = false,
+              keyStrength = 4096) {
     this.keyStrength = keyStrength;
     this.connection = connection;
     this.testMode = testMode;
