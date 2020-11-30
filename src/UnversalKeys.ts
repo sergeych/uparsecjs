@@ -567,7 +567,7 @@ export class UniversalPasswordKey extends UniversalKey {
    * @param count how many keys to create
    * @param options optional options.
    */
-  static async deriveMiltiple(
+  static async deriveMultiple(
     password: string,
     count: number,
     options?: Partial<PKDOptions>

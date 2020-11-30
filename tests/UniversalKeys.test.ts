@@ -106,7 +106,7 @@ describe("UniversalKeys", () => {
   it("provides password multikeys", async () => {
     clearKdfCache();
     let password = "superpassowrd";
-    const [k1, k2, k3] = await UniversalPasswordKey.deriveMiltiple(password, 3, { rounds: 17 });
+    const [k1, k2, k3] = await UniversalPasswordKey.deriveMultiple(password, 3, { rounds: 17 });
 
     expect(getKdfCacheHits()).toBe(2);
     expect(getKdfCacheMisses()).toBe(1);

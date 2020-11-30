@@ -1,6 +1,6 @@
 {
   "name": "uparsecjs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Universa Parsec & tools, 4th generation primitives",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "fastestsmallesttextencoderdecoder": ">1.0.14",
     "isomorphic-fetch": "^2.2.1",
     "node-fetch": "^2.6.0",
-    "unicrypto": "^1.0.4"
+    "unicrypto": "^1.1.2"
   },
   "devDependencies": {
     "@babel/parser": "^7.9.6",
