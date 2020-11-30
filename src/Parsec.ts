@@ -1,7 +1,7 @@
 import { bossDump, bossLoad } from "./SimpleBoss";
 import { SymmetricKey } from "unicrypto";
 
-const isNode = typeof module !== 'undefined' && module.exports;
+const isNode = (typeof module !== 'undefined') && !!module.exports;
 const isBrowser = !isNode;
 
 export class ErrorCode extends Error {
@@ -21,8 +21,9 @@ export class RemoteException extends ErrorCode {
   }
 }
 
-if( isNode )
-  window.fetch = require('node-fetch');
+console.log(`Fetch polyfilling mode check: isNode=${isNode}`)
+
+const portableFetch = isNode ? require('node-fetch') : window.fetch;
 
 /**
  * Some minimal subset of Storage (like window.sessionStorage/localStorage
@@ -139,7 +140,7 @@ export class RootConnection implements PConnection {
       isBrowser ? new Blob([packed], { type: "application/octet-stream" }) : Buffer.from(packed),
       new Date().toJSON() + ".bin"
     );
-    return fetch(this.rootUri, {
+    return portableFetch(this.rootUri, {
       method: "POST",
       body: formData
     }).then(function (resp) {
