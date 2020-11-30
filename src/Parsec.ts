@@ -21,7 +21,7 @@ export class RemoteException extends ErrorCode {
   }
 }
 
-if( !window.fetch)
+if( isNode )
   window.fetch = require('node-fetch');
 
 /**

@@ -1,12 +1,9 @@
 import { ParsecSessionStorage, RootConnection } from "../src/Parsec";
 
-import 'isomorphic-fetch'
 import { decode64, PrivateKey } from "unicrypto";
 import { POW, POWTask, Session } from "../src/ParsecSession";
 import { CachedStoredValue } from "../src/CachedStoredValue";
 import { utf8ToBytes } from "../src";
-
-window.FormData = require('form-data');
 
 class TestSessionStorage implements ParsecSessionStorage {
 
