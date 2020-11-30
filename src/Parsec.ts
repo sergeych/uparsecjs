@@ -21,6 +21,9 @@ export class RemoteException extends ErrorCode {
   }
 }
 
+if( !window.fetch)
+  window.fetch = require('node-fetch');
+
 /**
  * Some minimal subset of Storage (like window.sessionStorage/localStorage
  * needed to keep and manage permanent Parsec sessions. Window.localStorage and Window.sessionStorage
