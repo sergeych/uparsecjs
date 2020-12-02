@@ -1,8 +1,11 @@
 import { bossDump, bossLoad } from "./SimpleBoss";
 import { SymmetricKey } from "unicrypto";
 
-const isNode = (typeof module !== 'undefined') && !!module.exports;
-const isBrowser = !isNode;
+export const isNode = typeof process !== 'undefined'
+  && process.versions != null
+  && process.versions.node != null;
+
+export const isBrowser = !isNode;
 
 export class ErrorCode extends Error {
   readonly text: string;
