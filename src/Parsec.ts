@@ -100,7 +100,7 @@ export interface PConnection {
 
 /**
  * Level 0 parsec connection, used to execute authentication and registration commands, which
- * in turn should provide credentials to connect a secure {@linkt Endpoint}. Usually, this type of
+ * in turn should provide credentials to connect a secure {@link Endpoint}. Usually, this type of
  * connection is used to access API root, what explains the name.
  */
 export class RootConnection implements PConnection {

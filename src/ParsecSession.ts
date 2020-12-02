@@ -170,6 +170,16 @@ export class Session implements PConnection {
   }
 
   /**
+   * Get the current TSK value, it is defined at the moment. TSK could be used and us actually used in parsec
+   * enabled services as a secure per-session nonce/temporary id value that is dropped on logout, knwon at the
+   * moment to both server and client without any additional data exchange.
+   */
+  get currentTSK(): Uint8Array | null {
+    return this.TSK.value;
+  }
+
+
+  /**
    * Call parsec command over session endpoint waiting it to be established or reestablished. See {@link PConnection}.
    *
    * @param method
