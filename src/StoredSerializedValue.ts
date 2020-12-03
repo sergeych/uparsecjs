@@ -25,6 +25,7 @@ export class StoredSerializedValue<T> {
       this.storage.removeItem(this.key);
     else
       this.storage.setItem(this.key, this.serializer.serialize(value));
+    this.cachedValue = undefined;
   }
 
   clear() { this.value = null; }

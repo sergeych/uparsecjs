@@ -15,6 +15,12 @@ export * from "./UnversalKeys";
 
 import { utf8ToBytes } from "./tools";
 
+// we will add it to unicrypto instead
+// export type BossPrimitive = string | null | number | Date | boolean | BossArray | BossObject | Uint8Array;
+// /*eslint @typescript-eslint/no-empty-interface: "off" */
+// export interface BossArray extends Array<BossPrimitive> {}
+// export interface BossObject extends Record<string,BossPrimitive> {}
+
 /**
  * Simple compare semver version strings.
  * @param v1

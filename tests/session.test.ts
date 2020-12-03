@@ -1,6 +1,6 @@
 import { ParsecSessionStorage, RootConnection } from "../src/Parsec";
 
-import { decode64, PrivateKey } from "unicrypto";
+import { decode64, encode64, PrivateKey, randomBytes } from "unicrypto";
 import { POW, POWTask, Session } from "../src/ParsecSession";
 import { CachedStoredValue } from "../src/CachedStoredValue";
 import { utf8ToBytes } from "../src";
@@ -97,6 +97,36 @@ it("re/connects", async() => {
   expect(session3.tskGenerationCount).toBe(1);
 
   console.log(await session3.call("info"));
+});
+
+it("reconnects on wrong TSK", async() => {
+  const sessionStorage = new TestSessionStorage();
+
+  const skaProvider = async (refresh: Boolean) => {
+    return [testServiceKeyAddress];
+  }
+
+  const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
+  let info = await session1.call("getSessionInfo");
+  console.log("info", info, `sessionid: ${await session1.id}`);
+  console.log("-------------------------------------------------",sessionStorage)
+  expect(session1.sckGenerationCount).toBe(1);
+  expect(session1.tskGenerationCount).toBe(1);
+
+  const x = new CachedStoredValue(sessionStorage,".p1.SID");
+  expect(x.value).not.toBeNull();
+
+  // spoil the TSK, session should regenerate ot
+  // session 3 reuses SCK only
+  const storage3 = sessionStorage.clone();
+  storage3.setItem(".p1.TSK", encode64(randomBytes(32)));
+  const session3 = new Session(storage3, rc, skaProvider, true, 2048);
+  expect(await session3.id).toBe(await session1.id);
+  expect(session3.sckGenerationCount).toBe(0);
+  expect(session3.tskGenerationCount).toBe(1);
+
+  console.log(await session3.call("info"));
+
 });
 
 it("pings remote", async () => {
