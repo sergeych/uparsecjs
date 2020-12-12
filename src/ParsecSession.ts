@@ -40,11 +40,11 @@ class KeyAddressProvider {
   private cached: undefined | Promise<Uint8Array[]>;
   private requestRefresh = false;
 
-  constructor( private provider: ServiceKeyAddressesProvider) {
+  constructor(private provider: ServiceKeyAddressesProvider) {
   }
 
   get value(): Promise<Uint8Array[]> {
-    if( !this.cached ) {
+    if (!this.cached) {
       this.cached = this.provider(this.requestRefresh);
       this.requestRefresh = false;
     }
@@ -82,7 +82,7 @@ export class POW {
    * @param task that expected to be solved
    * @param solution solution to check.
    */
-  static async check(task: POWTask,solution: Uint8Array): Promise<Boolean> {
+  static async check(task: POWTask, solution: Uint8Array): Promise<Boolean> {
     switch (task.type) {
       case 1:
         const sha = new SHA("sha3_384");
@@ -108,7 +108,7 @@ export class Session implements PConnection {
   private readonly testMode: boolean;
   private readonly cachedSessionId: CachedStoredValue;
   private readonly TSK: StoredSerializedValue<Uint8Array>;
-  private readonly SCK: AsyncStoredSerializedValue<PrivateKey|null>;
+  private readonly SCK: AsyncStoredSerializedValue<PrivateKey | null>;
   private readonly serviceKeyAddresses: KeyAddressProvider;
 
   // debugging parameters
@@ -154,7 +154,7 @@ export class Session implements PConnection {
       }
     )
 
-    this.SCK = new AsyncStoredSerializedValue<PrivateKey|null>(
+    this.SCK = new AsyncStoredSerializedValue<PrivateKey | null>(
       storage,
       storageKeySCK,
       {
@@ -186,8 +186,27 @@ export class Session implements PConnection {
    * @param params
    */
   async call(method: string, params: any = {}): Promise<any> {
-    return (await this.sessionEndpoint).call(method, params);
+    try {
+      return await (await this.sessionEndpoint).call(method, params);
+    } catch (e) {
+      if (e instanceof RemoteException) {
+        switch (e.code) {
+          case "parsec_missing_tsk":
+          case "parsec_session_not_found":
+            await this.refreshSessionKey()
+            return await this.call(method, params);
+          case 'unknown_exception':
+            if (e.text.includes("HMAC")) {
+              // this ought to be bad or missing TSK:
+              await this.refreshSessionKey();
+              return this.call(method, params);
+            }
+        }
+        throw e;
+      }
+    }
   }
+
   /**
    * Await connection. This is rarely need as using it as {@link PConnection} instance, e.g. with {@link call}
    * automatically awaits for connection to be established.
@@ -200,7 +219,7 @@ export class Session implements PConnection {
    * Promise to connected session id. Therefore, it will not resolve until the session is established.
    */
   public get id(): Promise<string> {
-    return this.sessionEndpoint.then( () => {
+    return this.sessionEndpoint.then(() => {
       return this.cachedSessionId.value!
     });
   }
@@ -232,7 +251,10 @@ export class Session implements PConnection {
    */
   async kill(): Promise<boolean> {
     try {
-      try { await this.call("destroySession", {}) } catch {};
+      try {
+        await this.call("destroySession", {})
+      } catch {
+      }
       this.cachedSessionId.value = null;
       this.SCK.clear();
       this.TSK.clear();
@@ -287,7 +309,7 @@ export class Session implements PConnection {
     // request and save new TSK
     const clientNonce = randomBytes(32);
     try {
-      console.log("create tsk for "+this.cachedSessionId.value);
+      console.log("create tsk for " + this.cachedSessionId.value);
       const result = await this.connection.call("createTSK", {
         signedRecord: await SignedRecord.packWithKey(
           (await this.SCK.get())!,
@@ -320,10 +342,9 @@ export class Session implements PConnection {
           return this.connect();
         }
       }
-      if( this.tskGenerationCount < 3) {
+      if (this.tskGenerationCount < 3) {
         console.debug("no known ServiceKey found, trying to refresh.")
-      }
-      else
+      } else
         console.warn("provided ServiceKey is not known, need to rescan knwonn keys");
 
     } catch (e) {

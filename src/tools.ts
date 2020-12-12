@@ -1,4 +1,4 @@
-/*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
+
 
 import { encode64, decode64 } from 'unicrypto'
 

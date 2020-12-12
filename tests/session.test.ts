@@ -129,6 +129,44 @@ it("reconnects on wrong TSK", async() => {
 
 });
 
+it("reconnects on bad TSK", async() => {
+  const sessionStorage = new TestSessionStorage();
+
+  const skaProvider = async (refresh: Boolean) => {
+    return [testServiceKeyAddress];
+  }
+
+  const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
+  let info = await session1.call("getSessionInfo");
+  console.log("info", info, `sessionid: ${await session1.id}`);
+  console.log("-------------------------------------------------",sessionStorage)
+  expect(session1.sckGenerationCount).toBe(1);
+  expect(session1.tskGenerationCount).toBe(1);
+
+  await session1.call("sessionDropTSK");
+  console.log(await session1.call("info"));
+
+});
+
+it("reconnects on dropped TSK on logout", async() => {
+  const sessionStorage = new TestSessionStorage();
+
+  const skaProvider = async (refresh: Boolean) => {
+    return [testServiceKeyAddress];
+  }
+
+  const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
+  let info = await session1.call("getSessionInfo");
+  console.log("info", info, `sessionid: ${await session1.id}`);
+  console.log("-------------------------------------------------",sessionStorage)
+  expect(session1.sckGenerationCount).toBe(1);
+  expect(session1.tskGenerationCount).toBe(1);
+
+  await session1.call("sessionPerformLogout");
+  console.log(await session1.call("info"));
+
+});
+
 it("pings remote", async () => {
   const rc = new RootConnection("https://api.myonly.cloud/api/p0")
   const res = await rc.call("time")
