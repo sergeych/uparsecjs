@@ -9,7 +9,6 @@
  * when ransomware agents could be in any developer or server computer being integrated into "valid" applications
  * NPM packages and even core libraries (especially in windows).
  *
- * @packageDocumentation
  *
  */
 import { Boss, PrivateKey, randomBytes, SignedRecord, SymmetricKey } from "unicrypto";
@@ -70,6 +69,7 @@ async function packKeyRecord(key: ZLKey): Promise<ZLKeyRecord> {
 async function unpackKeyRecord(kr: ZLKeyRecord): Promise<ZLKey> {
   switch (kr.algorithm) {
     case "RSA/2048":
+    case "RSA/8192":
     case "RSA/4096":
       return new ZLPrivateKey(await PrivateKey.unpack(kr.packed), ...kr.tags);
     case "AES256":
@@ -161,7 +161,7 @@ export class Zedentials {
    * Generate and store new symmetric key
    * @param tags
    */
-  generateSymmetricKey(...tags: string[]): void {
+  createSymmetricKey(...tags: string[]): void {
     this._keys.push(new ZLSymmetricKey(new SymmetricKey(), randomBytes(32), ...tags));
   }
 
@@ -201,7 +201,7 @@ export class Zedentials {
    * @param password
    * @param rounds
    */
-  async encryptWith(password: string, rounds = 1000): Promise<Uint8Array> {
+  async encryptWith(password: string, rounds = 100000): Promise<Uint8Array> {
     const salt = randomBytes(32);
     this.setKeyParams(rounds, salt, SymmetricKey.fromPassword(password, rounds, salt));
     return this.encrypt();
@@ -247,14 +247,14 @@ export class Zedentials {
 
   static async decrypt(password: string, ciphertext: Uint8Array): Promise<Zedentials> {
     try {
-    const br = new Boss.Reader(ciphertext);
-    const magick = br.read();
-    if (magick != Zedentials.magick) throw new ZedentialsError("invalid magick label");
-    const [rounds, salt, encryptedData] = br.read();
-    if (rounds < 1) throw new ZedentialsError("invalid rounds value");
-    const key = await SymmetricKey.fromPassword(password, rounds, salt);
+      const br = new Boss.Reader(ciphertext);
+      const magick = br.read();
+      if (magick != Zedentials.magick) throw new ZedentialsError("invalid magick label: "+magick);
+      const [rounds, salt, encryptedData] = br.read();
+      if (rounds < 1) throw new ZedentialsError("invalid rounds value");
+      const key = await SymmetricKey.fromPassword(password, rounds, salt);
       const plaintext = await key.etaDecrypt(encryptedData);
-      const [version, packedCreatorKey, keyRecords, fields, tail] = Boss.load(plaintext);
+      const [version, packedCreatorKey, keyRecords, fields, ] = Boss.load(plaintext);
       if (version != 1) throw new ZedentialsError("invalid version: " + version);
       const keys = await Promise.all((keyRecords as ZLKeyRecord[]).map(kr => unpackKeyRecord(kr as ZLKeyRecord)));
       const result = new Zedentials(

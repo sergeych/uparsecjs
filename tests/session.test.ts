@@ -162,7 +162,7 @@ it("reconnects on dropped TSK on logout", async() => {
   expect(session1.sckGenerationCount).toBe(1);
   expect(session1.tskGenerationCount).toBe(1);
 
-  await session1.call("sessionPerformLogout");
+  await session1.call("logout");
   console.log(await session1.call("info"));
 
 });
