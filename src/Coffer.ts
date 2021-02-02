@@ -2,7 +2,7 @@ import { PasswordKeyTag, UniversalKey, UniversalKeyTag, UniversalPasswordKey } f
 
 import { Boss, bytesToHex, randomBytes, SymmetricKey, textToBytes } from "unicrypto";
 import { bytesToUtf8 } from "./tools";
-import { bossDump, bossLoad } from "./SimpleBoss";
+import { bossDump, bossLoad, BossObject } from "./SimpleBoss";
 
 interface InnerKeyRecord {
   tag: UniversalKeyTag,
@@ -95,7 +95,7 @@ export class Coffer {
   }
 
   setPayload(payload: object | Uint8Array ): Coffer {
-    this.payload = payload instanceof Uint8Array ? payload : bossDump(payload);
+    this.payload = payload instanceof Uint8Array ? payload : bossDump(payload as BossObject);
     return this;
   }
 

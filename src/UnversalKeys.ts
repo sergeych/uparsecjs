@@ -306,7 +306,7 @@ export class UniversalPrivateKey extends UniversalKey {
 
   private readonly options = { ...UniversalPrivateKey.defaultOptions };
 
-  private constructor(privateKey: PrivateKey, options = {}) {
+  constructor(privateKey: PrivateKey, options = {}) {
     super();
     this.privateKey = privateKey;
     this.options = { ...this.options, ...options };

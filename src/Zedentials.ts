@@ -9,11 +9,12 @@
  * when ransomware agents could be in any developer or server computer being integrated into "valid" applications
  * NPM packages and even core libraries (especially in windows).
  *
+ * @packageDocumentation
  *
  */
 import { Boss, PrivateKey, randomBytes, SignedRecord, SymmetricKey } from "unicrypto";
-import { BossObject, BossPrimitive } from "@/mnmarket/MarketService";
-import { concatenateBinary, equalArrays } from "uparsecjs";
+import { BossObject, BossPrimitive } from "./SimpleBoss";
+import { equalArrays } from "./tools";
 
 export type ZLKeyAlgorithm = "RSA/2048" | "RSA/4096" | "RSA/8192" | "AES256";
 

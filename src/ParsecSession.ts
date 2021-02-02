@@ -98,7 +98,40 @@ export class POW {
 
 /**
  * Parsec.1 family session client processor. It also implements PConnection and can be used as a connection
- * for session-level commands.
+ * for session-level commands. Session consumes [[PConnection]] and constructs parsec.1 protocol over it,
+ * by implementing same [[PConnection]] interface.
+ *
+ * Usage sample:
+ *
+ * ```typescript
+ * import { ParsecSessionStorage, RootConnection } from "./Parsec";
+ *
+ *  // First, we construct connection. Connection could use any transport, but
+ * // this module provides only http as for now:
+ * const rootConnection = new RootConnection("http://parsec.your.host/api/p1");
+ *
+ * // Implement parsec session storage to safely keep parsec session information
+ * // between restarts. It should be encrypted and protected with password, or
+ * // should doscard data on application exit, though it will cause to session re-
+ * // establishing that takes a lot of time without stored parameters:
+ * const storage: ParsecSessionStorage = new SomeProtectedStorage()
+ *
+ *  // Let session known the list of available addresses of the serivce, as for 1.1:
+ *  const addressProvider = (refresh: boolean) => {
+ *   // in real life we might respect refresh value and provide more than one
+ *   // address.
+ *   return [
+ *     decode64("EMbhPh0J22t0EfITdXOhHnB2HKW9oBqxsIbWU7iBzGO4/N20x833lL527PBvV/ZSUnROnqs=")
+ *   ];
+ * }
+ *
+ *  // With connection, we can build se
+ *  const session = new Session(storage, rootConnection, addressProvider);
+ *
+ *  // Now we can execute parsec commands:
+ *  const result = await session.call("myCommand", {foo: 'bar', buzz: 42});
+ *
+ * ```
  */
 export class Session implements PConnection {
   private readonly connection: PConnection;

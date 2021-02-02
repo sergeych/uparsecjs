@@ -84,6 +84,10 @@ export class Command {
 
 /**
  * Interface to any parsec connection level, it is always the same despite of protection level.
+ * Generally, parsec connection could use any transport, not only HTTP/S, an dany such transpor
+ * should be implemented as this interface. For example {@link RootConnection} implements parsec.0
+ * commands, which are used in parsec.1 [[Session]], which consumes [[PConnection]] and implements it already
+ * at protocol level 1 protected commands.
  */
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface PConnection {
@@ -109,9 +113,10 @@ export class RootConnection implements PConnection {
 
   /**
    * Construct anonumous parsec connection gate using a given root URL, which is
-   * typical "https://acme.com/api/p0" or "https://parsec.acme.com/p0" - p0 means it
-   * accepts and executes level 0 commands that come without extra authentication and
-   * encryption. See {@link Endpoint}.
+   * typical "https://acme.com/api/p1" or "https://parsec.acme.com/p1" - p1 means it
+   * accepts and executes level 1 commands that come without extra authentication and
+   * encryption. See {@link Endpoint} and {@link "ParsecSession"} for Session class that consumes
+   * and implements PConnection.
    *
    * @param rootUri URI to connect to.
    */

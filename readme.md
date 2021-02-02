@@ -1,31 +1,69 @@
 # Universa Parsec Crypto library, JS/TS
 
-Parsec tools and extended crypto primitives of 4th generation Universa primitives, async  mode using unicrypto wasm library. Some new primitives included are:
+The `uparsecjs` library implements parsec protocol primitives and full
+featured parsec 1.x client. It is written in typescript but is fully accessible from
+plain javascript.
 
-- Parsec connection, session and endpoint, including type 1 POW processing
+[Parsec](https://kb.universablockchain.com/parsec_1_specifications/303#) is a
+of PARanodally SECure command-based binary protocol that detects many attacks 
+including certificate-based MITM over SSL and DNS spoofing, being completely immune to many SSL flaws and 
+effectively work on plain `HTTP` what is recommended connection outside browser 
+pages context, as SSL only slows parsec down not adding any extra security to it.
 
-- UniversalKey: extends AbstractKey to better different keys interoperability and common interfaces
- 
-    - introduced more reliable and secure tags, derivable from passwords, from addresses of public keys or just random ids for symmetric keys, with smart serialization. 
-    
-    - Private/Public keys encryption is extended: now it is possible to encrypt any datam if it will not fit under the inner key space, the random symmetric key will be used and all the available space under assymetric key will be used too. Greatly improves encrypted data size for larger assymetric keys.
-    
-    - using password as 1st class keys, with automatic derivation and derived data caching
-    
-    - deriving multiple keys from a password seamlessly using cached derived data as need 
-     
-- Coffers: space-wise container for effective encryption of some data with any of multiple keys. Adding more keys to the coffer without preaking its content. Note, there is no need to sign coffer as UniversalKeys used to encrypt it all are used in ETA mode and guarantee contents integrity.
+When running from browser page it is necessary to use https connections as browsers
+know yet nothing about parsec and assume any `http` connections insecure, which,
+in our case, is not true.
 
-- Extended signed records
+Note that parsec over http implementation in this package uses only a single 
+`HTTP POST` endpoint with `form-multipart` encoded binary data, ad accepts binary
+data as a result.
 
-- Parsec simple and encrypted command de/encryptors
+`uparsecjs` works in following environments:
 
-- Typescript friendly interfaces to universa low level objects (like BOSS, encoders, etc.)
+- all modern desktop browsers (e.g. FireFox, Chrome/Chromium, Safari, Edge, etc)
+- all modern mobile browsers (Chrome/Chromium. Samsung browser,Safari, etc)
+- nodejs servers
 
-- Various tools
+It internally uses `unicrypto` library with `WASM` based fast cryptography written
+in C, that let it works fairly well on smartphones. It is actively used in many
+our projects, including PWAs and b2b integrations.
 
+## Usage
 
-> under construction, not ready for any evaluation.
+For details, see [online documentation](https://kb.universablockchain.com/system/static/uparsecjs/index.html), 
+recommented entry point is a [Session](https://kb.universablockchain.com/system/static/uparsecjs/classes/_parsecsession_.session.html)
+class. Example code:
+
+~~~ts
+import { ParsecSessionStorage, RootConnection } from "./Parsec";
+
+// First, we construct connection. Connection could use any transport, but
+// this module provides only http as for now:
+const rootConnection = new RootConnection("http://parsec.your.host/api/p1");
+
+// Implement parsec session storage to safely keep parsec session information
+// between restarts. It should be encrypted and protected with password, or
+// should doscard data on application exit, though it will cause to session re-
+// establishing that takes a lot of time without stored parameters:
+const storage: ParsecSessionStorage = new SomeProtectedStorage()
+
+// Let session known the list of available addresses of the serivce, as for 1.1:
+const addressProvider = (refresh: boolean) => {
+  // in real life we might respect refresh value and provide more than one 
+  // address.
+  return [
+    decode64("EMbhPh0J22t0EfITdXOhHnB2HKW9oBqxsIbWU7iBzGO4/N20x833lL527PBvV/ZSUnROnqs=")
+  ];
+}
+
+// With connection, we can build se 
+const session = new Session(storage, rootConnection, addressProvider);
+
+// Now we can execute parsec commands:
+const result = await session.call("myCommand", {foo: 'bar', buzz: 42});
+~~~
+
+We try to self-document all parts as much as possible.
 
 ## Licesnse 
 

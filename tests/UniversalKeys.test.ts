@@ -15,6 +15,7 @@ import {
 
 // import { Coffer, CofferException, SerializedCoffer } from "@/sergecych.uni3/Coffer";
 import { bytesToUtf8, utf8ToBytes } from "../src/tools";
+import { PrivateKey } from "unicrypto";
 
 async function testUniversalKey(key: UniversalKey) {
   try {
@@ -34,7 +35,7 @@ async function testUniversalKey(key: UniversalKey) {
 
 async function testDeEncrypt(key: UniversalKey) {
   let longText = "";
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 3000; i++) {
     longText += `${i} single line of a long text`;
   }
   const shortData = utf8ToBytes("fucked up beyond all recognition");
@@ -52,6 +53,11 @@ describe("UniversalKeys", () => {
 
   it("de/encrypts shorts and longs with private keys", async () => {
     await testUniversalKey(await UniversalPrivateKey.generate(2048));
+  });
+
+  it("de/encrypts shorts and longs with constructed private keys", async () => {
+    const pk = await PrivateKey.generate({strength:2048});
+    await testUniversalKey(new UniversalPrivateKey(pk));
   });
 
   it("de/encrypts shorts and longs with symmetric keys", async () => {
