@@ -11,6 +11,8 @@ import {
 import { bytesToHex, decode64, PrivateKey, SHA } from "unicrypto";
 import { UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
 import { sha256 } from "../src";
+import { MemorySessionStorage } from "../src/MemorySessionStorage";
+import { PrefixedSessionStorage } from "../src/PrefixedSessionStorage";
 
 it("retry OK", async () => {
   let count = 0;
@@ -56,6 +58,26 @@ it("de/encodes URLs", () => {
   const source = decode64("a+b//cc=")
   expect(encode64url(source)).toBe("a-b__cc");
   expect(decode64url(encode64url(source))).toStrictEqual(source);
+});
+
+it("provides prefixed and memory session storages", () => {
+  const ms = new MemorySessionStorage()
+  const prefix = "prf_"
+  const ps = new PrefixedSessionStorage(prefix, ms);
+
+  ms.setItem("foo", "bar")
+  ms.setItem("bar", "42");
+  expect(ms.getItem("foo")).toBe("bar")
+  expect(ms.getItem("bar")).toBe("42")
+
+  ps.setItem("foo", "buzz")
+  ps.setItem("bar", "142");
+  expect(ms.getItem("foo")).toBe("bar")
+  expect(ms.getItem("bar")).toBe("42")
+  expect(ps.getItem("foo")).toBe("buzz")
+  expect(ps.getItem("bar")).toBe("142")
+  expect(ms.getItem(prefix+"foo")).toBe("buzz")
+  expect(ms.getItem(prefix+"bar")).toBe("142")
 });
 
 // it("runs completable promises", async () => {
