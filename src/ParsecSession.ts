@@ -8,7 +8,6 @@ import { Endpoint, ParsecSessionStorage, PConnection, RemoteException } from "./
 import { CachedStoredValue } from "./CachedStoredValue";
 import { StoredSerializedValue } from "./StoredSerializedValue";
 import { AsyncStoredSerializedValue } from "./AsyncStoredSerializedValue";
-import { CachedValue } from "./CachedValue";
 
 const storageKeySCK = ".p1.SCK";
 const storageKeyTSK = ".p1.TSK";
@@ -25,16 +24,17 @@ export type POWTask = POWTask1;
 /**
  * The async callback that should obtain and return, or refresh and return list of known service addresses.
  * The real addresses could be, for example, extracted from some Universa contract or obtained from UNS2
- * network-stored contract, provided by the service itself and so on. This is becaise parsec 1.x allows
- * 3 ways of checking service address: pre-shared address, pre-shared serivce contract origin or UNS2 name, and
+ * network-stored contract, provided by the service itself and so on. This is because parsec 1.x allows
+ * 3 ways of checking service address: pre-shared address, pre-shared service contract origin or UNS2 name, and
  * this library should work with all 3. See parsec papers in kb for more.
  *
- * @param refresh callers sets it to true to request refreshing known addresses from external srouces where
+ * @param refresh callers sets it to true to request refreshing known addresses from external sources where
  *                applicable. Generally it means that the reported addresses do not match and the service
- *                might have published updated serivce contract
+ *                might have published updated service contract
  */
 type ServiceKeyAddressesProvider = (refresh: boolean) => Promise<Uint8Array[]>;
 
+// noinspection JSUnusedGlobalSymbols
 class KeyAddressProvider {
 
   private cached: undefined | Promise<Uint8Array[]>;
@@ -96,6 +96,7 @@ export class POW {
   }
 }
 
+// noinspection JSUnusedGlobalSymbols,ExceptionCaughtLocallyJS
 /**
  * Parsec.1 family session client processor. It also implements PConnection and can be used as a connection
  * for session-level commands. Session consumes [[PConnection]] and constructs parsec.1 protocol over it,
@@ -112,11 +113,11 @@ export class POW {
  *
  * // Implement parsec session storage to safely keep parsec session information
  * // between restarts. It should be encrypted and protected with password, or
- * // should doscard data on application exit, though it will cause to session re-
+ * // should discard data on application exit, though it will cause to session re-
  * // establishing that takes a lot of time without stored parameters:
  * const storage: ParsecSessionStorage = new SomeProtectedStorage()
  *
- *  // Let session known the list of available addresses of the serivce, as for 1.1:
+ *  // Let session known the list of available addresses of the service, as for 1.1:
  *  const addressProvider = (refresh: boolean) => {
  *   // in real life we might respect refresh value and provide more than one
  *   // address.
@@ -148,9 +149,11 @@ export class Session implements PConnection {
   tskGenerationCount = 0;
   sckGenerationCount = 0;
 
+  static debugLogger?: (...str: string[]) => void
+
   /**
    * Construct a session over a given root connection and using a given storage to keep session persistent.
-   * As soon as sessino instance is constructed, it begin session establishing and could be used immediately
+   * As soon as session instance is constructed, it begin session establishing and could be used immediately
    * as a {@link PConnection} instance or to await {@link endpoint}.
    *
    * @param storage to get/store session parameters
@@ -204,13 +207,12 @@ export class Session implements PConnection {
 
   /**
    * Get the current TSK value, it is defined at the moment. TSK could be used and us actually used in parsec
-   * enabled services as a secure per-session nonce/temporary id value that is dropped on logout, knwon at the
+   * enabled services as a secure per-session nonce/temporary id value that is dropped on logout, known at the
    * moment to both server and client without any additional data exchange.
    */
   get currentTSK(): Uint8Array | null {
     return this.TSK.value;
   }
-
 
   /**
    * Call parsec command over session endpoint waiting it to be established or reestablished. See {@link PConnection}.
@@ -302,19 +304,19 @@ export class Session implements PConnection {
     if (this.TSK.value) {
       const sid = this.cachedSessionId.value;
       if (!sid) {
-        console.debug("inconsistent TSK: no session id, dropping");
+        logDebug("inconsistent TSK: no session id, dropping");
       } else {
         // we may be ok:
         const ep = new Endpoint(this.connection, { sessionKey: this.TSK.value!, authToken: sid })
         try {
           const result = await ep.call("getSessionInfo");
-          console.debug("session info", result);
+          logDebug("session info", result);
           this.sessionExpiresAt = result.expiresAt;
           // success: we got an endpoint!
           return ep;
         } catch (e) {
           if (e instanceof RemoteException) {
-            console.debug(`session can't be connected: ${e.message}, dropping`);
+            logDebug(`session can't be connected: ${e.message}, dropping`);
             // fallback will clear TSK
           } else {
             console.warn("network error, failing");
@@ -331,10 +333,10 @@ export class Session implements PConnection {
     if (await this.SCK.get()) {
       const ep = await this.connectWithSCK();
       if (ep) return ep;
-      console.debug("session SCK is invalid, dropping it");
+      logDebug("session SCK is invalid, dropping it");
       this.SCK.clear();
     }
-    console.debug("creating new SCK");
+    logDebug("creating new SCK");
     return this.generateNewSCK();
   }
 
@@ -342,7 +344,7 @@ export class Session implements PConnection {
     // request and save new TSK
     const clientNonce = randomBytes(32);
     try {
-      console.log("create tsk for " + this.cachedSessionId.value);
+      logDebug("create tsk for " + this.cachedSessionId.value);
       const result = await this.connection.call("createTSK", {
         signedRecord: await SignedRecord.packWithKey(
           (await this.SCK.get())!,
@@ -366,23 +368,23 @@ export class Session implements PConnection {
       this.tskGenerationCount++;
       for (const a of await this.serviceKeyAddresses.value) {
         if (equalArrays(signedAddress, a)) {
-          console.debug("key service address found, decrypting TSK");
+          logDebug("key service address found, decrypting TSK");
           // now we have to decrypt payload:
           const plainResult = bossLoad<any>(await (await this.SCK.get())!.decrypt(sr.payload.encryptedResult));
           this.TSK.value = plainResult.TSK;
           this.sessionExpiresAt = plainResult.TSKExpiresAt;
-          console.debug("got a TSK, restarting session for it");
+          logDebug("got a TSK, restarting session for it");
           return this.connect();
         }
       }
       if (this.tskGenerationCount < 3) {
-        console.debug("no known ServiceKey found, trying to refresh.")
+        logDebug("no known ServiceKey found, trying to refresh.")
       } else
-        console.warn("provided ServiceKey is not known, need to rescan knwonn keys");
+        console.warn("provided ServiceKey is not known, need to rescan known keys");
 
     } catch (e) {
       if (e instanceof RemoteException) {
-        console.debug("service rejected our SCK->TSK request: " + e.message + ", will reset SCK");
+        logDebug("service rejected our SCK->TSK request: " + e.message + ", will reset SCK");
         this.SCK.clear();
         return this.generateNewSCK();
       } else throw e;
@@ -403,11 +405,11 @@ export class Session implements PConnection {
           testMode: this.testMode
         });
         // prepare POW solution:
-        console.debug("got SCK POWTask, calculating solution for length " + result.POWTask.length);
+        logDebug("got SCK POWTask, calculating solution for length " + result.POWTask.length);
         const sr: Uint8Array = await SignedRecord.packWithKey(sck, {
           POWResult: await POW.solve(result.POWTask)
         });
-        console.debug("Registering new SCK key with solved POW")
+        logDebug("Registering new SCK key with solved POW")
         result = await this.connection.call("registerSCK", {
           context: result.context,
           signedRecord: sr
@@ -428,3 +430,9 @@ export class Session implements PConnection {
     }
   }
 }
+
+function logDebug(...msg: string[]): void {
+  const l = Session.debugLogger;
+  if( l ) l(...msg);
+}
+

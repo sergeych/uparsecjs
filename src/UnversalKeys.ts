@@ -7,7 +7,7 @@ import {
   randomBytes,
   SymmetricKey
 } from "unicrypto";
-import { bossDump, bossLoad } from "./SimpleBoss";
+import { bossDump, bossLoad, BossObject } from "./SimpleBoss";
 import { sha256 } from "./index";
 
 /* istanbul ignore next */
@@ -321,7 +321,7 @@ export class UniversalPrivateKey extends UniversalKey {
       tag: this.tag,
       packedKey: await this.privateKey.pack(),
       algorithm: rsaAlgorithm,
-      options: this.options
+      options: this.options as BossObject
     };
   }
 

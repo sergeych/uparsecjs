@@ -48,7 +48,7 @@ it("test service contains 1.1 in test mode",async () => {
 it("checks POW", async () => {
   const task = {type: 1,length: 4, source: utf8ToBytes("foobar")} as POWTask;
   const solution = await POW.solve(task)
-  console.log(":: ",solution)
+  // console.log(":: ",solution)
   expect(await POW.check(task, solution)).toBeTruthy();
   expect(await POW.check(task, solution.slice(1))).toBeFalsy();
 });
@@ -59,9 +59,9 @@ it("requests SCK", async () => {
   expect(info.parsecVersions).toContain("1.1")
 
   let r = await rc.call("requestSCK", {SCKAddress: await tkAddress, testMode: true});
-  console.log(r);
+  // console.log(r);
   let solution = await POW.solve(r.POWTask);
-  console.log(solution);
+  // console.log(solution);
 });
 
 it("re/connects", async() => {
@@ -73,8 +73,8 @@ it("re/connects", async() => {
 
   const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
   let info = await session1.call("getSessionInfo");
-  console.log("info", info, `sessionid: ${await session1.id}`);
-  console.log("-------------------------------------------------",sessionStorage)
+  // console.log("info", info, `sessionid: ${await session1.id}`);
+  // console.log("-------------------------------------------------",sessionStorage)
   expect(session1.sckGenerationCount).toBe(1);
   expect(session1.tskGenerationCount).toBe(1);
 
@@ -96,7 +96,7 @@ it("re/connects", async() => {
   expect(session3.sckGenerationCount).toBe(0);
   expect(session3.tskGenerationCount).toBe(1);
 
-  console.log(await session3.call("info"));
+  // console.log(await session3.call("info"));
 });
 
 it("reconnects on wrong TSK", async() => {
@@ -108,8 +108,8 @@ it("reconnects on wrong TSK", async() => {
 
   const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
   let info = await session1.call("getSessionInfo");
-  console.log("info", info, `sessionid: ${await session1.id}`);
-  console.log("-------------------------------------------------",sessionStorage)
+  // console.log("info", info, `sessionid: ${await session1.id}`);
+  // console.log("-------------------------------------------------",sessionStorage)
   expect(session1.sckGenerationCount).toBe(1);
   expect(session1.tskGenerationCount).toBe(1);
 
@@ -125,7 +125,7 @@ it("reconnects on wrong TSK", async() => {
   expect(session3.sckGenerationCount).toBe(0);
   expect(session3.tskGenerationCount).toBe(1);
 
-  console.log(await session3.call("info"));
+  // console.log(await session3.call("info"));
 
 });
 
@@ -138,13 +138,13 @@ it("reconnects on bad TSK", async() => {
 
   const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
   let info = await session1.call("getSessionInfo");
-  console.log("info", info, `sessionid: ${await session1.id}`);
-  console.log("-------------------------------------------------",sessionStorage)
+  // console.log("info", info, `sessionid: ${await session1.id}`);
+  // console.log("-------------------------------------------------",sessionStorage)
   expect(session1.sckGenerationCount).toBe(1);
   expect(session1.tskGenerationCount).toBe(1);
 
   await session1.call("sessionDropTSK");
-  console.log(await session1.call("info"));
+  // console.log(await session1.call("info"));
 
 });
 
@@ -157,13 +157,13 @@ it("reconnects on dropped TSK on logout", async() => {
 
   const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
   let info = await session1.call("getSessionInfo");
-  console.log("info", info, `sessionid: ${await session1.id}`);
-  console.log("-------------------------------------------------",sessionStorage)
+  // console.log("info", info, `sessionid: ${await session1.id}`);
+  // console.log("-------------------------------------------------",sessionStorage)
   expect(session1.sckGenerationCount).toBe(1);
   expect(session1.tskGenerationCount).toBe(1);
 
   await session1.call("logout");
-  console.log(await session1.call("info"));
+  // console.log(await session1.call("info"));
 
 });
 

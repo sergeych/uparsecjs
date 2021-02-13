@@ -10,9 +10,10 @@ import {
 } from "../src/tools";
 import { bytesToHex, decode64, PrivateKey, SHA } from "unicrypto";
 import { UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
-import { sha256 } from "../src";
+import { bossDump, BossObject, BossPrimitive, bossUnpack, bossUnpackObject, sha256 } from "../src";
 import { MemorySessionStorage } from "../src/MemorySessionStorage";
 import { PrefixedSessionStorage } from "../src/PrefixedSessionStorage";
+import { Type } from "typedoc/dist/lib/models";
 
 it("retry OK", async () => {
   let count = 0;
@@ -78,6 +79,24 @@ it("provides prefixed and memory session storages", () => {
   expect(ps.getItem("bar")).toBe("142")
   expect(ms.getItem(prefix+"foo")).toBe("buzz")
   expect(ms.getItem(prefix+"bar")).toBe("142")
+});
+
+
+it("supports strong typed boss with non-js maps", () => {
+  // this is the hardest case: map<object,...> which is pretty ok with all other
+  // languages boss is used withm but is hardly usave in js, but we need to encode and
+  // decode it properly:
+  const m1 = new Map<BossPrimitive,string>();
+  m1.set({foo:"bar", reason: 42}, "buzz");
+  const data1 = { m1: m1, sample: true};
+
+  const data2 = bossUnpackObject(bossDump(data1));
+  console.log(data2);
+  const k = [...(data2.m1 as Map<BossPrimitive,string>).keys()][0] as BossObject;
+  expect(k?.foo).toEqual("bar");
+  expect(k?.reason).toEqual(42);
+  const v = [...(data2.m1 as Map<BossPrimitive,string>).values()][0] as string;
+  expect(v).toEqual("buzz");
 });
 
 // it("runs completable promises", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "uparsecjs",
-  "version": "0.0.38",
+  "version": "0.0.40",
   "description": "Universa Parsec.1 & tools",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
   "license": "MIT",
@@ -14,11 +14,12 @@
     "url": "git@github.com:sergeych/uparsecjs.git"
   },
   "scripts": {
-    "link": "npm run build && cd dist && npm link",
+    "link": "yarn build && cd dist && yarn link",
     "build": "tsc",
     "full_build": "tsc && yarn docs",
     "docs": "typedoc",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "pub": "yarn test && yarn build && yarn publish"
   },
   "bin": {
     "uni2text": "dist/cli/uni2text.js"
