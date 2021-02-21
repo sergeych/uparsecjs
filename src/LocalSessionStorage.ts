@@ -1,16 +1,15 @@
 import { ParsecSessionStorage } from "./Parsec";
 
 /**
- * Implements [[ParsecSessionStorage]] backed by `Window.localStorage`, to be used in browsers
- * or where such storage exists. Stores parsec data unencrypted.
+ * @deprecated use web Storage directly: [[ParsecSessionStorage]] is a subset of web [[Storage]]
+ * interface, so it is recommended direct useage of `localStorage` of `sessionStorage`.
+ *
+ *
+ * This class is left for compatibility reasons and will be removed in future releases.
  */
 class LocalSessionStorage implements ParsecSessionStorage {
   private ls: Storage = localStorage
 
-  /**
-   * Construct a storage using a prefix to avoid nam e conflicts. See [[ParsecSessionStorage]] for more.
-   * @param prefix prefix is added to all values parsesc stores in the session.
-   */
   constructor(readonly prefix = "_pss_") {
     if( !this.ls) throw new Error("No local storage found")
   }

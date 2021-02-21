@@ -1,6 +1,6 @@
 {
   "name": "uparsecjs",
-  "version": "0.0.41",
+  "version": "0.1.1",
   "description": "Universa Parsec.1 & tools",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
   "license": "MIT",
@@ -17,9 +17,9 @@
     "link": "yarn build && cd dist && yarn link",
     "build": "tsc",
     "full_build": "tsc && yarn docs",
-    "docs": "typedoc",
+    "docs": "typedoc --excludePrivate",
     "test": "jest --coverage",
-    "pub": "yarn test && yarn build && yarn publish"
+    "pub": "yarn test && yarn build && yarn publish && pubdocs"
   },
   "bin": {
     "uni2text": "dist/cli/uni2text.js"
@@ -29,7 +29,7 @@
     "fastestsmallesttextencoderdecoder": ">1.0.14",
     "isomorphic-fetch": "^2.2.1",
     "node-fetch": "^2.6.0",
-    "unicrypto": "^1.4.1"
+    "unicrypto": "1.5.2"
   },
   "devDependencies": {
     "@babel/parser": "^7.9.6",
