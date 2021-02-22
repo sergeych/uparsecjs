@@ -1,3 +1,9 @@
+/**
+ * Universa text objects allow ti embed universa objects into text focuments, e.g. markdown,
+ * plain text, html, whatever, detect such objects presence and extract them. I allows create
+ * free form human readable documents with embedding necessary objects directly into the text.
+ * @module text_tools
+ */c
 import { decode64, encode64, PrivateKey, PublicKey } from "unicrypto";
 import { bossLoad, bytesToUtf8, sha256 } from "./index";
 

@@ -65,6 +65,15 @@ const result = await session.call("myCommand", {foo: 'bar', buzz: 42});
 
 We try to self-document all parts as much as possible.
 
+## Additional content
+
+This library also contains all-purppsed or specialized library functions, notably:
+
+- [UNS name reduction](https://kb.universablockchain.com/system/static/uparsecjs/modules/_uns_.html) to prevent "looks alike" attacks. 
+- [Zedentials](https://kb.universablockchain.com/system/static/uparsecjs/modules/_uns_.html) to safely keep sensitive credentials to nover touch disk, ransomware defence. 
+- [Password strength estimator](https://kb.universablockchain.com/system/static/uparsecjs/classes/_passwords_.passwords.html#estimatebitstrength)
+- [Unversa Text Format converters](https://kb.universablockchain.com/system/static/uparsecjs/modules/_text_tools_.html)
+
 ## Licesnse 
 
 MIT, see the repository.

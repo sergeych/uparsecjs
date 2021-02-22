@@ -1,6 +1,6 @@
 {
   "name": "uparsecjs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Universa Parsec.1 & tools",
   "author": "Sergey Chernov <real.sergeych@gmail.com>",
   "license": "MIT",
@@ -11,7 +11,7 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:sergeych/uparsecjs.git"
+    "url": "https://github.com/sergeych/uparsecjs.git"
   },
   "scripts": {
     "link": "yarn build && cd dist && yarn link",
