@@ -31,10 +31,10 @@ class TestSessionStorage implements ParsecSessionStorage {
 const testServiceKeyAddress = decode64("EMbhPh0J22t0EfITdXOhHnB2HKW9oBqxsIbWU7iBzGO4/N20x833lL527PBvV/ZSUnROnqs=");
 
 //If you don't have any parsec 1.x started locally, one can use some real public service:
-// const rc = new RootConnection("https://api.myonly.cloud/api/p1");
+const rc = new RootConnection("https://api.myonly.cloud/api/p1");
 
 // though I'd recommend use local one
-const rc = new RootConnection("http://localhost:8094/api/p1");
+// const rc = new RootConnection("http://localhost:8094/api/p1");
 
 const tk = (async()=>{return PrivateKey.generate({strength: 2048})})();
 const tkAddress = tk.then((k) => k.publicKey.longAddress.bytes)
