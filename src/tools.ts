@@ -167,3 +167,13 @@ export function concatenateBinary(...src: Uint8Array[]): Uint8Array {
   return result;
 }
 
+export function reportEx<T>(x: ()=>T): T {
+  try {
+    return x();
+  }
+  catch(ex) {
+    console.error("reportEx:", ex);
+    throw ex;
+  }
+}
+

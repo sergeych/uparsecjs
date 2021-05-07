@@ -8,9 +8,9 @@ import {
   retry,
   utf8ToBytes
 } from "../src/tools";
-import { bytesToHex, decode64, PrivateKey, SHA, SymmetricKey } from "unicrypto";
+import { Boss, bytesToHex, decode64, encode64, PrivateKey, SHA, SymmetricKey } from "unicrypto";
 import { UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
-import { bossDump, BossObject, BossPrimitive, bossUnpack, bossUnpackObject, sha256 } from "../src";
+import { bossDump, bossLoad, BossObject, BossPrimitive, bossUnpack, bossUnpackObject, sha256 } from "../src";
 import { MemorySessionStorage } from "../src/MemorySessionStorage";
 import { PrefixedSessionStorage } from "../src/PrefixedSessionStorage";
 import { Type } from "typedoc/dist/lib/models";
@@ -54,8 +54,8 @@ it("provides immediately connected CachedStorage", () => {
 });
 
 it("connected underlying storage to CachedStorage", () => {
-  // const ms = new MemorySessionStorage();
-  const ms = sessionStorage;
+  const ms = new MemorySessionStorage();
+  // const ms = sessionStorage;
   const cs = new CachedSessionStorage();
 
   cs.setItem("foo", "bar");
@@ -80,13 +80,37 @@ it("connected underlying storage to CachedStorage", () => {
 
 import { unicryptoReady } from 'unicrypto'
 import { EncryptedSessionStorage } from "../src/EncryptedSessionStorage";
+import { randomBytes } from "crypto";
+
+it("unicrypto-boss works", async () => {
+  await unicryptoReady;
+  interface Initializer extends BossObject {
+    keyPrefix: Uint8Array;
+    keyPostfix: Uint8Array;
+    version: number;
+  }
+  let initializer: Initializer;
+  let key = new SymmetricKey();
+  initializer = {
+    version: 1,
+    keyPrefix: randomBytes(32),
+    keyPostfix: randomBytes(32)
+  };
+  const encrypted = Boss.dump(initializer);
+  const decrypted = Boss.load(encrypted);
+  console.log(initializer);
+  console.log(decrypted);
+  expect(decrypted).toEqual(encrypted);
+});
+
 
 it("provides encrypted storage", async () => {
   await unicryptoReady;
 
   sessionStorage.clear();
   const key = new SymmetricKey();
-  const ms = sessionStorage;
+  const ms = new MemorySessionStorage();
+  // const ms = sessionStorage;
   const cs = new EncryptedSessionStorage(ms,key);
 
   cs.setItem("foo", "bar");
@@ -95,6 +119,7 @@ it("provides encrypted storage", async () => {
   expect(cs.getItem("foo")).toEqual("bar");
   expect(cs.getItem("bar")).toEqual("buzz");
 
+  ms.printContents();
   const cs2 = new EncryptedSessionStorage(ms, key);
   expect(cs2.getItem("foo")).toEqual("bar");
   expect(cs2.getItem("bar")).toEqual("buzz");
@@ -105,10 +130,10 @@ it("provides encrypted storage", async () => {
   expect( () =>new EncryptedSessionStorage(ms, new SymmetricKey()))
     .toThrowError();
 
-  for( let i=0; i< sessionStorage.length; i++) {
-    const k = sessionStorage.key(i);
-    console.log(`${k}: ${sessionStorage.getItem(k!)}`);
-  }
+  // for( let i=0; i< sessionStorage.length; i++) {
+  //   const k = sessionStorage.key(i);
+  //   console.log(`${k}: ${sessionStorage.getItem(k!)}`);
+  // }
   expect(EncryptedSessionStorage.existsIn(sessionStorage)).toBeTruthy();
   EncryptedSessionStorage.clearIn(sessionStorage);
   expect(EncryptedSessionStorage.existsIn(sessionStorage)).toBeFalsy();

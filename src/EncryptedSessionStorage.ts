@@ -4,15 +4,17 @@ import { decode64, encode64, SHA, SymmetricKey } from "unicrypto";
 import { bytesToUtf8, concatenateBinary, utf8ToBytes } from "./tools";
 import { bossDump, bossLoad, BossObject } from "./SimpleBoss";
 import { randomBytes } from "crypto";
+import { binaryDump } from "./dumps";
 
-interface Initializer extends BossObject{
+interface Initializer extends BossObject {
   keyPrefix: Uint8Array;
   keyPostfix: Uint8Array;
   version: number;
 }
 
 const plainPrefix = "._$EnCsT$._";
-const inirializerKey= plainPrefix + "li3u45hfd7d91GJg"
+const initializerKey = plainPrefix + "li3u45hfd7d91GJg"
+
 /**
  * Storage that encrypts its contents on the fly.
  * It is pessimistic and paranoid so it encrypts also keys and therefore it can b etime consuming,
@@ -34,13 +36,13 @@ const inirializerKey= plainPrefix + "li3u45hfd7d91GJg"
  * const storage = new EncryptedSessionStorage(localStorage, key);
  * ```
  */
-export class EncryptedSessionStorage implements ParsecSessionStorage{
+export class EncryptedSessionStorage implements ParsecSessionStorage {
 
   #key: SymmetricKey;
   #prefix: Uint8Array;
   #postfix: Uint8Array;
-  #cachedKeys = new Map<string,string>();
-  #cachedValues = new Map<string,string>();
+  #cachedKeys = new Map<string, string>();
+  #cachedValues = new Map<string, string>();
 
   /**
    * Open existing or construct new storage over web storage or paresec session storage.
@@ -56,19 +58,33 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
    *
    * @throws Error if the storage already has data for encrypted session storage but the key is wrong
    */
-  constructor(private storage: ParsecSessionStorage | Storage,key: SymmetricKey) {
+  constructor(private storage: ParsecSessionStorage | Storage, key: SymmetricKey) {
     this.#key = key;
-    const packedInitializer = this.storage.getItem(inirializerKey);
+    const packedInitializer = this.storage.getItem(initializerKey);
     let initializer: Initializer;
-    if( packedInitializer )
+    if (packedInitializer) {
+      console.log("get init:", packedInitializer);
       initializer = bossLoad(key.etaDecryptSync(decode64(packedInitializer)));
-    else {
+    } else {
       initializer = {
         version: 1,
         keyPrefix: randomBytes(32),
         keyPostfix: randomBytes(32)
       };
-      this.storage.setItem(inirializerKey, encode64(key.etaEncryptSync(bossDump(initializer))));
+      const encrypted = encode64(key.etaEncryptSync(bossDump(initializer)));
+      this.storage.setItem(initializerKey, encrypted);
+      console.log("Set init", encrypted);
+      console.log("Recheck", this.storage.getItem(initializerKey));
+      console.log("Recheck2", bossLoad(key.etaDecryptSync(decode64(this.storage.getItem(initializerKey)!!))));
+    }
+    if (!initializer.keyPrefix) {
+      console.log("Strange initializer");
+      if (packedInitializer) {
+        console.log("decrypted:");
+        console.log(binaryDump((key.etaDecryptSync(decode64(packedInitializer)))));
+        console.log("which decodes to");
+        console.log(bossLoad(key.etaDecryptSync(decode64(packedInitializer))));
+      }
     }
     // initialize key encryption subsystem
     this.#prefix = initializer.keyPrefix;
@@ -77,20 +93,20 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
 
   private transformKey(key: string) {
     let result = this.#cachedKeys.get(key);
-    if( !result ) {
+    if (!result) {
       const data = concatenateBinary(this.#prefix, utf8ToBytes(key), this.#postfix);
       result = plainPrefix + encode64(SHA.getDigestSync("sha3_384", data));
-      this.#cachedKeys.set(key,result);
+      this.#cachedKeys.set(key, result);
     }
     return result;
   }
 
   getItem(key: string): string | null {
     let result = this.#cachedValues.get(key) ?? null;
-    if( result ) return result;
+    if (result) return result;
     const tk = this.transformKey(key);
     const encrypted = this.storage.getItem(tk);
-    if( encrypted ) {
+    if (encrypted) {
       result = bytesToUtf8(this.#key.etaDecryptSync(decode64(encrypted)));
       this.#cachedValues.set(key, result);
     }
@@ -103,7 +119,7 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
   }
 
   setItem(key: string, value: string): void {
-    this.#cachedValues.set(key,value);
+    this.#cachedValues.set(key, value);
     this.storage.setItem(this.transformKey(key),
       encode64(this.#key.etaEncryptSync(utf8ToBytes(value)))
     );
@@ -120,9 +136,9 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
    * @param storage web storage to clear encrypted data from.
    */
   static clearIn(storage: Storage) {
-    for(let i=0; i<storage.length; i++) {
+    for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
-      if( key?.startsWith(plainPrefix))
+      if (key?.startsWith(plainPrefix))
         storage.removeItem(key);
     }
   }
@@ -135,7 +151,7 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
    * @param storage true if there are encrypted session storage data.
    */
   static existsIn<T extends Storage>(storage: T): boolean {
-    return storage.getItem(inirializerKey) !== null;
+    return storage.getItem(initializerKey) !== null;
   }
 
 }

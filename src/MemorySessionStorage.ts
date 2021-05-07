@@ -11,6 +11,8 @@ export class MemorySessionStorage implements ParsecSessionStorage {
   private data = new Map<string, string>();
 
   getItem(key: string): string | null {
+    if( key == "._$EnCsT$._li3u45hfd7d91GJg")
+      console.log(`get: ${key} >> ${this.data.get(key)}`);
     return this.data.get(key) ?? null;
   }
 
@@ -19,6 +21,8 @@ export class MemorySessionStorage implements ParsecSessionStorage {
   }
 
   setItem(key: string, value: string): void {
+    if( key == "._$EnCsT$._li3u45hfd7d91GJg")
+      console.log(`set: ${key} << ${value}`)
     this.data.set(key, value);
   }
 
@@ -45,5 +49,11 @@ export class MemorySessionStorage implements ParsecSessionStorage {
 
   clear(): void {
     this.data.clear();
+  }
+
+  printContents() {
+    for( const [k,v] of this.data) {
+      console.log(`${k} -> ${v}`);
+    }
   }
 }

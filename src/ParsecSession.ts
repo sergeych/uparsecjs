@@ -1,7 +1,7 @@
 import { decode64, encode64, PrivateKey, SHA, SignedRecord } from "unicrypto";
 import { bossLoad } from "./SimpleBoss";
 import { randomBytes } from "crypto";
-import { equalArrays } from "./tools";
+import { equalArrays, reportEx } from "./tools";
 import { ParsecAuthenticationException } from "./ParsecExceptions";
 import { BitMixer } from "./BitMixer";
 import { Endpoint, ParsecSessionStorage, PConnection, RemoteException } from "./Parsec";
@@ -198,7 +198,7 @@ export class Session implements PConnection {
           return encode64(await object!.pack())
         },
         deserialize(serialized: string): Promise<PrivateKey | null> {
-          return PrivateKey.unpack(decode64(serialized));
+          return reportEx(()=>PrivateKey.unpack(decode64(serialized)));
         }
       }
     )
