@@ -167,3 +167,17 @@ export function concatenateBinary(...src: Uint8Array[]): Uint8Array {
   return result;
 }
 
+/**
+ * Catch and report exceptions in the callback, then rethrow an exception.
+ * @param cb callback to report exception from
+ */
+export function reportEx<T>(cb: ()=>T): T {
+  try {
+    return cb();
+  }
+  catch(ex) {
+    console.error("reportEx:", ex);
+    throw ex;
+  }
+}
+
