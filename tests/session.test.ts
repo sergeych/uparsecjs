@@ -4,6 +4,7 @@ import { decode64, encode64, PrivateKey, randomBytes } from "unicrypto";
 import { POW, POWTask, Session } from "../src/ParsecSession";
 import { CachedStoredValue } from "../src/CachedStoredValue";
 import { utf8ToBytes } from "../src";
+import { MemorySessionStorage } from "../src/MemorySessionStorage";
 
 class TestSessionStorage implements ParsecSessionStorage {
 
@@ -171,4 +172,29 @@ it("pings remote", async () => {
   const rc = new RootConnection("https://api.myonly.cloud/api/p0")
   const res = await rc.call("time")
   expect(typeof res.time).toBe("number")
+});
+
+it("handles properly invalid session connections", async() => {
+  const rc = new RootConnection("http://localhost:9876/api/p1");
+  try {
+    const res = await rc.call("check");
+    fail("it should throw exception");
+  }
+  catch(e) {
+  }
+
+  const session = new Session(
+    new MemorySessionStorage(),
+    rc,
+    (r) => Promise.resolve([]),
+    true,
+    2048
+  );
+  try {
+    const res = await session.call("check");
+    console.log(res);
+    fail("it must throw exception");
+  }
+  catch(e) {
+  }
 });

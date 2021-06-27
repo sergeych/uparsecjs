@@ -227,9 +227,10 @@ export class Session implements PConnection {
       if (e instanceof RemoteException) {
         switch (e.code) {
           case "parsec_missing_tsk":
-          case "parsec_session_not_found":
+          case "parsec_session_not_found": {
             await this.refreshSessionKey()
             return await this.call(method, params);
+          }
           case 'unknown_exception':
             if (e.text.includes("HMAC")) {
               // this ought to be bad or missing TSK:
@@ -237,8 +238,8 @@ export class Session implements PConnection {
               return this.call(method, params);
             }
         }
-        throw e;
       }
+      throw e;
     }
   }
 
@@ -433,6 +434,6 @@ export class Session implements PConnection {
 
 function logDebug(...msg: string[]): void {
   const l = Session.debugLogger;
-  if( l ) l(...msg);
+  if (l) l(...msg);
 }
 
