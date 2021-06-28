@@ -196,5 +196,6 @@ it("handles properly invalid session connections", async() => {
     fail("it must throw exception");
   }
   catch(e) {
+    console.log(e);
   }
 });
