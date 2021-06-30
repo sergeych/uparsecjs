@@ -14,6 +14,7 @@ import { bossDump, BossObject, BossPrimitive, bossUnpack, bossUnpackObject, sha2
 import { MemorySessionStorage } from "../src/MemorySessionStorage";
 import { PrefixedSessionStorage } from "../src/PrefixedSessionStorage";
 import { Type } from "typedoc/dist/lib/models";
+import { Emitter } from "../src/Emitter";
 
 it("retry OK", async () => {
   let count = 0;
@@ -76,6 +77,25 @@ it("supports strong typed boss with non-js maps", () => {
   expect(k?.reason).toEqual(42);
   const v = [...(data2.m1 as Map<BossPrimitive,string>).values()][0] as string;
   expect(v).toEqual("buzz");
+});
+
+it("emits", ()=>{
+  const e = new Emitter<string>();
+  let lastVal = "---";
+  const handle1 = e.addListener((x) => lastVal = x);
+  expect(lastVal).toBe("---");
+  e.fire("s1");
+  expect(lastVal).toBe("s1");
+  e.removeListener(handle1)
+  e.fire("s2");
+  expect(lastVal).toBe("s1");
+  const handle2 = e.addListener((x) => lastVal = x);
+  e.fire("s3");
+  expect(lastVal).toBe("s3");
+  handle2.unsubscribe();
+  e.fire("s4");
+  expect(lastVal).toBe("s3");
+
 });
 
 // it("runs completable promises", async () => {

@@ -4,6 +4,28 @@
 export type EmitterEventListener<T> = (eventObj: T) => void;
 
 /**
+ * Handle to unsubscribe event listener returned from [[Emitter.addListener]].
+ */
+export class EmitterHandle {
+  constructor(readonly label: string,readonly emitter: Emitter<any>) {
+  }
+
+  /**
+   * Remove the listener from its emitter. It is ok to call it more than once, after first call it does nothing.
+   */
+  unsubscribe() {
+    this.emitter.removeListener(this.label);
+  }
+
+  /**
+   * returns the label. Same as [[label]].
+   */
+  toString() {
+    return this.label;
+  }
+}
+
+/**
  * Minimalistic typed event emitter. Was initially created to support also weak listeners but
  * its support is postponed until the weak references will be widely adopted. Could be used as a compact
  * event bus implementation.
@@ -20,20 +42,21 @@ export class Emitter<T> {
    * on event [[fire]],
    *
    * @param lr listener to add
-   * @return listener label that could be used to [[removeListener]]
+   * @return handle that could be used to unsubscribe this listener.
    */
-  addListener(lr: EmitterEventListener<T>): string {
+  addListener(lr: EmitterEventListener<T>): EmitterHandle  {
     const label = "" + this.count++;
-    this.strongListeners.set(label, lr)
-    return label
+    this.strongListeners.set(label, lr);
+    return new EmitterHandle(label, this);
   }
 
   /**
    * Remove listener by its identifier. Does nothing if it does not exist.
-   * @param label listener label
+   * @param handle or its label (backward compatibility) of the listener to remove
    */
-  removeListener(label: string): void {
-    this.strongListeners.delete(label)
+  removeListener(label: string | EmitterHandle): void {
+    const l = label instanceof  EmitterHandle ? label.label : label;
+    this.strongListeners.delete(l);
   }
 
   /**
