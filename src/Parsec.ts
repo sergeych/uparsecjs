@@ -33,7 +33,7 @@ const portableFetch = isNode ? require('node-fetch') : window.fetch;
  */
 export interface ParsecSessionStorage {
   /**
-   * Return item with the specifed key name or null.
+   * Return item with the specified key name or null.
    * @param key
    */
   getItem(key: string): string | null;
@@ -61,7 +61,7 @@ export class Command {
    * Pack parsec command using method name and key-value arguments.
    * @param method name
    * @param args method arguments
-   * @return inary parsec command block
+   * @return binary parsec command block
    */
 
   static pack(method: string, args = {}): Uint8Array {
@@ -84,7 +84,7 @@ export class Command {
 
 /**
  * Interface to any parsec connection level, it is always the same despite of protection level.
- * Generally, parsec connection could use any transport, not only HTTP/S, an dany such transpor
+ * Generally, parsec connection could use any transport, not only HTTP/S, an dany such transport
  * should be implemented as this interface. For example {@link RootConnection} implements parsec.0
  * commands, which are used in parsec.1 [[Session]], which consumes [[PConnection]] and implements it already
  * at protocol level 1 protected commands.
@@ -112,7 +112,7 @@ export class RootConnection implements PConnection {
   readonly rootUri: string;
 
   /**
-   * Construct anonumous parsec connection gate using a given root URL, which is
+   * Construct anonymous parsec connection gate using a given root URL, which is
    * typical "https://acme.com/api/p1" or "https://parsec.acme.com/p1" - p1 means it
    * accepts and executes level 1 commands that come without extra authentication and
    * encryption. See {@link Endpoint} and {@link "ParsecSession"} for Session class that consumes
@@ -167,7 +167,7 @@ export class RootConnection implements PConnection {
  * encrypted and authenticated version of {@link RootConnection}.
  */
 export class Endpoint implements PConnection {
-  #authToken: string;
+  readonly #authToken: string;
   #sessionKey: SymmetricKey;
   connection: PConnection;
 

@@ -2,9 +2,8 @@
  * The Promise that could explicitly be resolved or rejected by calling
  * its methods. Could be used as a regular promise.
  *
- * Note that "modified" system promise under V8 is much less effective than unaltered
- * promise, that's why consider using {@link Completable} that perform better on frequent calls but
- * can't be im-place replacement where the Promise is required or used.
+ * Note that "modified" system promise under V8 was once found much less effective than unaltered
+ * promise. While We hope it is already fixed, it could still be a bottleneck.
  */
 export class CompletablePromise<T> implements Promise<T> {
 
@@ -24,8 +23,8 @@ export class CompletablePromise<T> implements Promise<T> {
 
   [Symbol.toStringTag]: string = "CompletablePromise";
 
-  finally(onfinally?: () => void): Promise<T> {
-    return this.#promise.finally(onfinally);
+  finally(onFinally?: () => void): Promise<T> {
+    return this.#promise.finally(onFinally);
   }
 
   /**
@@ -52,11 +51,11 @@ export class CompletablePromise<T> implements Promise<T> {
     this.#rejecter(error)
   }
 
-  catch<TResult = never>(onrejected?: ((reason: any) => (PromiseLike<TResult> | TResult)) | undefined | null): Promise<T | TResult> {
-    return this.#promise.catch(onrejected);
+  catch<TResult = never>(onRejected?: ((reason: any) => (PromiseLike<TResult> | TResult)) | undefined | null): Promise<T | TResult> {
+    return this.#promise.catch(onRejected);
   }
 
-  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | undefined | null, onrejected?: ((reason: any) => (PromiseLike<TResult2> | TResult2)) | undefined | null): Promise<TResult1 | TResult2> {
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | undefined | null, onRejected?: ((reason: any) => (PromiseLike<TResult2> | TResult2)) | undefined | null): Promise<TResult1 | TResult2> {
     return this.#promise.then(onfulfilled);
   }
 

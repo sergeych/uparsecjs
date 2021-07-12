@@ -12,12 +12,12 @@ export async function timeout(millis: number): Promise<void> {
 
 /**
  * Execute some function up to `times` times until it return. Catches any exception it may
- * throw and retry specified number ot `times` thed throws the last exception. The function
+ * throw and retry specified number ot `times` then throws the last exception. The function
  * can be async, then it will be awaited. The retry() is always async despite the function type
  * as it may wait for a timeout between attempts.
  *
  * @param times how many retry attempts to perform
- * @param intervalMills interval between anntemps
+ * @param intervalMills interval between attempts
  * @param f function to execute. Could be async.
  */
 export async function retry<T>(
@@ -72,8 +72,8 @@ export function bytesToUtf8(bytes: Uint8Array): string {
 
 /**
  * Convert an unsigned number (possibly long one) into array of bytes MSB first (big endian), the same byte order used
- * by Java/Scala BigIntegers so they are mutually interoperable. The length of the array is autmatic just to hold the
- * specified number. If some specific minimal length is needed, _prepend it with zeroes_. See also
+ * by Java/Scala BigIntegers so they are mutually interoperable. The length of the array is automatically calculated
+ * to hold the specified number. If some specific minimal length is needed, _prepend it with zeroes_. See also
  * {@linkcode byteArrayToLong}.
  *
  * @param longNumber number to convert
@@ -140,6 +140,7 @@ export function equalArrays<T>(a: ArrayLike<T>, b: ArrayLike<T>): boolean {
   return true;
 }
 
+// noinspection JSUnusedLocalSymbols
 function equalSets<T>(a: Set<T>,b: Set<T>): boolean {
   return a.size == b.size && ([...a].every((x) => b.has(x)));
 }

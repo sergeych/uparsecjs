@@ -2,7 +2,7 @@ import { ParsecSessionStorage } from "./Parsec";
 
 /**
  * @deprecated use web Storage directly: [[ParsecSessionStorage]] is a subset of web [[Storage]]
- * interface, so it is recommended direct useage of `localStorage` of `sessionStorage`.
+ * interface, so it is recommended direct usage of `localStorage` of `sessionStorage`.
  *
  *
  * This class is left for compatibility reasons and will be removed in future releases.

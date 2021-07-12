@@ -1,7 +1,7 @@
 import { ParsecSessionStorage } from "./Parsec";
 
 /**
- * Implements proxy for a [[ParsecSessionStorage]] that adds prefix to all keys when storing and retreiving data.
+ * Implements proxy for a [[ParsecSessionStorage]] that adds prefix to all keys when storing and retrieving data.
  * Convenient to join several storages in one separating their namespaces. Use it with some existing one. Data
  * are stored in parent storage.
  *

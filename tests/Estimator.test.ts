@@ -1,4 +1,4 @@
-import { Estimator } from "../src/Estimator";
+import { Estimator } from "../src";
 
 
 test("estimator", () => {

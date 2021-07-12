@@ -1,9 +1,4 @@
-import { sha3_384 } from "./index";
 import { SHA } from "unicrypto";
-
-const masks = [
-  1,2,4,8,16,32,64,128
-]
 
 /**
  * Bit manipulation routines (used for example in Parsec POW)
@@ -20,15 +15,14 @@ export class BitMixer {
     let pos = 0;
     let value = 0;
     let length = 0;
-    while(true) {
+    while (true) {
       if (mask >= 128) {
-        if( pos < bytes.length ) {
+        if (pos < bytes.length) {
           value = bytes[pos++];
           mask = 1;
-        }
-        else break;
+        } else break;
       } else mask <<= 1;
-      if( (value & mask) == 0 ) length++;
+      if ((value & mask) == 0) length++;
       else break;
     }
     return length;
@@ -41,19 +35,19 @@ export class BitMixer {
    * @param length
    */
   static async SolvePOW1(source: Uint8Array, length: number): Promise<Uint8Array> {
-    const buffer = Uint32Array.from([0,0]);
+    const buffer = Uint32Array.from([0, 0]);
     let index = 0;
     const result = new Uint8Array(buffer.buffer);
-    while(index < 2) {
+    while (index < 2) {
       const sha = new SHA("sha3_384");
       await sha.put(result);
       await sha.put(source);
       const s = await sha.get("bin");
-      if( this.countZeroes(s) == length )
+      if (this.countZeroes(s) == length)
         return result;
-      if( buffer[index]++ == 0xFFFFffff )
+      if (buffer[index]++ == 0xFFFFffff)
         index++;
     }
-    throw Error("failed to solve POW1 of length "+length)
+    throw Error("failed to solve POW1 of length " + length)
   }
 }

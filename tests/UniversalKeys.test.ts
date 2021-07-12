@@ -1,6 +1,7 @@
 // import { textToBytes } from "universa-minicrypto";
 
 
+// import { Coffer, CofferException, SerializedCoffer } from "@/sergecych.uni3/Coffer";
 import {
   clearKdfCache,
   defaultPKDOptions,
@@ -10,17 +11,15 @@ import {
   UniversalKeys,
   UniversalPasswordKey,
   UniversalPrivateKey,
-  UniversalSymmetricKey
-} from '../src/UnversalKeys';
-
-// import { Coffer, CofferException, SerializedCoffer } from "@/sergecych.uni3/Coffer";
-import { bytesToUtf8, utf8ToBytes } from "../src/tools";
+  UniversalSymmetricKey,
+  utf8ToBytes
+} from '../src';
 import { PrivateKey } from "unicrypto";
 
 async function testUniversalKey(key: UniversalKey) {
   try {
     const key1 = await UniversalKeys.loadFrom(await key.serialize());
-    testDeEncrypt(key1);
+    await testDeEncrypt(key1);
     const src = utf8ToBytes("foobar");
     // console.log(key.serialize());
     // console.log(key1.serialize());
@@ -90,7 +89,7 @@ describe("UniversalKeys", () => {
       password: "123123",
       pkdOptions: opts2
     });
-    testUniversalKey(k2);
+    await testUniversalKey(k2);
 
     const k3 = new UniversalPasswordKey({
       password: "otherpassword",

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// noinspection ExceptionCaughtLocallyJS
 
 // const process = require('process');
 
@@ -17,8 +18,8 @@ const fs = require('fs').promises;
       description: `
         uni2text utility converts some Universa binary objects to text and back. When packing binary objects
         to text files, it process a single file. When unpacking from text file, it extracts all object found in it.
-        Conflicting file names are resolved by adding _(count) tp its name. note that if neigher -t nor -b flag is 
-        specified, the conversion direction will be selected by aalysing source file type.`
+        Conflicting file names are resolved by adding _(count) tp its name. note that if neither -t nor -b flag is 
+        specified, the conversion direction will be selected by analysing source file type.`
     });
 
     parser.addArgument('source', {
@@ -158,7 +159,6 @@ async function getFreeFileName(fileName: string): Promise<string> {
     fileName = fileName.replace(fullName, name+ext);
   }
   throw "can't create output file name";
-  return name;
 }
 
 function defaultNamefor(type: string): string {

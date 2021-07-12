@@ -18,4 +18,4 @@ echo "copying docs..."
 echo
 rsync -avz --info=progress2 ./docs/* deploy@a01.kb.universablockchain.com:/home/deploy/www/shared/public/system/static/uparsecjs || error "failed to copy docs"
 
-echo "done creating unversa gem docs on kb"
+echo "done creating universa gem docs on kb"

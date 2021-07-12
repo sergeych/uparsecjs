@@ -29,7 +29,7 @@ export class TimeService {
   }
 
   private async measure() {
-    // first 2 calls are alwaus very slow due to optimizations and network algorithms,
+    // first 2 calls are always very slow due to optimizations and network algorithms,
     // so we ignore it
     await this.step();
     await this.step();
@@ -58,7 +58,7 @@ export class TimeService {
   }
 
   /**
-   * Current timestamp at the remote stie, using currenly calculated
+   * Current timestamp at the remote site, using currently calculated
    * estimations.
    */
   async remoteNow(): Promise<Date> {

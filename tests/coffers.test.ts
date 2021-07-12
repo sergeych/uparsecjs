@@ -4,10 +4,17 @@
 //   return ua;
 // }
 
-import { Passwords } from "../src/Passwords";
-import { utf8ToBytes } from "../src/tools";
-import { Coffer, CofferException, SerializedCoffer } from "../src/Coffer";
-import { UniversalKey, UniversalPasswordKey, UniversalPrivateKey, UniversalSymmetricKey } from "../src/UnversalKeys";
+import {
+  Coffer,
+  CofferException,
+  Passwords,
+  SerializedCoffer,
+  UniversalKey,
+  UniversalPasswordKey,
+  UniversalPrivateKey,
+  UniversalSymmetricKey,
+  utf8ToBytes
+} from "../src";
 import { decode64, encode58, PrivateKey } from "unicrypto";
 
 describe("Coffer", () => {
@@ -41,7 +48,7 @@ describe("Coffer", () => {
     await coffer.addKeys(k1, k2);
     expect(coffer.payload).toBeNull();
     let payload = utf8ToBytes("Foo bar beyond all recognition");
-    let payload2 = utf8ToBytes("nonostante all ovversità");
+    let payload2 = utf8ToBytes("nonostante le ovversità");
     coffer.payload = payload;
     await testAvailable(await coffer.serialize(), payload, k1, k2);
     await testNotAvailable(await coffer.serialize(), k3, k4);

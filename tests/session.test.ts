@@ -1,9 +1,6 @@
-import { ParsecSessionStorage, RootConnection } from "../src/Parsec";
+import { CachedStoredValue, ParsecSessionStorage, POW, POWTask, RootConnection, Session, utf8ToBytes } from "../src";
 
 import { decode64, encode64, PrivateKey, randomBytes } from "unicrypto";
-import { POW, POWTask, Session } from "../src/ParsecSession";
-import { CachedStoredValue } from "../src/CachedStoredValue";
-import { utf8ToBytes } from "../src";
 import { MemorySessionStorage } from "../src/MemorySessionStorage";
 
 class TestSessionStorage implements ParsecSessionStorage {

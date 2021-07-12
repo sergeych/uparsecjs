@@ -29,7 +29,7 @@ function convert(object: any): string {
 /**
  * Catcher In The Ryan - CITR. Catches console logs, stores in the sliding-window buffer
  * and process them to make easy support cases. CITR installs in the chain so there could be
- * several instances (e.g. in library modules) working sumiltanously, which is not that effective as the
+ * several instances (e.g. in library modules) working simultaneously, which is not that effective as the
  * log buffers are not shared.
  *
  * Important! Catcher create copies of logged objects to prevent its state change by the
@@ -48,7 +48,7 @@ export class Citr {
 
   /**
    * Immediately intercepts console.log/warn/error and put a copy in
-   * own log biffer. The console continues to work as usual.
+   * own log buffer. The console continues to work as usual.
    *
    * @param maxSize number of log entries to keep. CITR holds only the last `maxSize` records.
    */
@@ -92,10 +92,10 @@ export class Citr {
         try {
           v = JSON.parse(convert(value));
           if (value instanceof Error)
-            stack = value.stack;
+            stackTrace = value.stack;
         } catch (e) {
           v = "! " + e
-          stack = e.stack
+          stackTrace = e.stack
         }
         return v;
       })
@@ -111,21 +111,20 @@ export class Citr {
    * send bugs information
    */
   createCrypstie() {
-    const pstr = JSON.stringify(
+    const data = JSON.stringify(
       {
         __type: "CITR_log",
         version: 1,
         log: this.log
       },
       undefined, 4);
-    // console.log(pstr);
     const form = document.createElement("form") as HTMLFormElement;
     form.action = window.location.host.startsWith("localhost") ? "http://localhost:3000" : "https://crypstie.com";
     form.method = "POST";
     const i = document.createElement("input");
     i.type = "hidden";
     i.name = "default_content";
-    i.value = pstr;
+    i.value = data;
     form.appendChild(i);
     document.body.appendChild(form);
     form.submit();

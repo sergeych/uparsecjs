@@ -8,7 +8,7 @@ import { MemorySessionStorage } from "./MemorySessionStorage";
  * - it can just cache data stored in any other storage for speed
  * - it can accumulate data _before the storage is connected_ then save it on connection.
  *
- * The latter scenario is very useful when. say, you have to connect parsec session before loggin in.
+ * The latter scenario is very useful when. say, you have to connect parsec session before logging in.
  * To not to expose parsec session to browser storage, you can wait until user log in or somehow ele
  * writes a password then connect the storage to some password protected (encrypted) storage,
  * for example, [[EncryptedSessionStorage]]. To do so,
@@ -48,7 +48,7 @@ export class CachedSessionStorage extends MemorySessionStorage {
   /**
    * Connect storage as underlying. All data already stored will be copied to it. After this call
    * this instance works as a cached proxy. To avoid strange bug _it is not possible to use underlying
-   * storage derectly after connection_. Access it from the cached storage only.
+   * storage directly after connection_. Access it from the cached storage only.
    *
    * If the storage already connected ({@link isConnected} === true), it will throw exception unless
    * `forceReplace` is set to true.

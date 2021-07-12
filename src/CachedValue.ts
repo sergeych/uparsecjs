@@ -3,7 +3,7 @@
  */
 export class CachedValue<T extends any | null> {
 
-  #callback: () => T;
+  readonly #callback: () => T;
   #cachedValue: T | undefined;
 
   /**

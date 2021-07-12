@@ -1,5 +1,4 @@
 import { ParsecSessionStorage } from "./Parsec";
-import { MemorySessionStorage } from "./MemorySessionStorage";
 import { decode64, encode64, SHA, SymmetricKey } from "unicrypto";
 import { bytesToUtf8, concatenateBinary, utf8ToBytes } from "./tools";
 import { bossDump, bossLoad, BossObject } from "./SimpleBoss";
@@ -12,13 +11,13 @@ interface Initializer extends BossObject{
 }
 
 const plainPrefix = "._$EnCsT$._";
-const inirializerKey= plainPrefix + "li3u45hfd7d91GJg"
+const initializerKey= plainPrefix + "li3u45hfd7d91GJg"
 /**
  * Storage that encrypts its contents on the fly.
  * It is pessimistic and paranoid so it encrypts also keys and therefore it can b etime consuming,
- * so it caches ecerything in memory to not to reencrypt keys and redecrypt values.
+ * so it caches everything in memory to not to re-encrypt keys and re-decrypt values.
  *
- * __Important__. It uses synchronous unicrypto interfaces and needs to habe unicrypto library be
+ * __Important__. It uses synchronous unicrypto interfaces and needs unicrypto library be
  * initialized before, e.g.
  * ```
  * import { unicryptoReady, SymmetricKey } from 'unicrypto'
@@ -37,8 +36,8 @@ const inirializerKey= plainPrefix + "li3u45hfd7d91GJg"
 export class EncryptedSessionStorage implements ParsecSessionStorage{
 
   #key: SymmetricKey;
-  #prefix: Uint8Array;
-  #postfix: Uint8Array;
+  readonly #prefix: Uint8Array;
+  readonly #postfix: Uint8Array;
   #cachedKeys = new Map<string,string>();
   #cachedValues = new Map<string,string>();
 
@@ -58,7 +57,7 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
    */
   constructor(private storage: ParsecSessionStorage | Storage,key: SymmetricKey) {
     this.#key = key;
-    const packedInitializer = this.storage.getItem(inirializerKey);
+    const packedInitializer = this.storage.getItem(initializerKey);
     let initializer: Initializer;
     if( packedInitializer )
       initializer = bossLoad(key.etaDecryptSync(decode64(packedInitializer)));
@@ -68,7 +67,7 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
         keyPrefix: randomBytes(32),
         keyPostfix: randomBytes(32)
       };
-      this.storage.setItem(inirializerKey, encode64(key.etaEncryptSync(bossDump(initializer))));
+      this.storage.setItem(initializerKey, encode64(key.etaEncryptSync(bossDump(initializer))));
     }
     // initialize key encryption subsystem
     this.#prefix = initializer.keyPrefix;
@@ -135,7 +134,7 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
    * @param storage true if there are encrypted session storage data.
    */
   static existsIn<T extends Storage>(storage: T): boolean {
-    return storage.getItem(inirializerKey) !== null;
+    return storage.getItem(initializerKey) !== null;
   }
 
 }

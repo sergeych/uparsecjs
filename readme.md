@@ -5,10 +5,10 @@ featured parsec 1.x client. It is written in typescript but is fully accessible 
 plain javascript.
 
 [Parsec](https://kb.universablockchain.com/parsec_1_specifications/303#) is a
-of PARanodally SECure command-based binary protocol that detects many attacks 
-including certificate-based MITM over SSL and DNS spoofing, being completely immune to many SSL flaws and 
-effectively work on plain `HTTP` what is recommended connection outside browser 
-pages context, as SSL only slows parsec down not adding any extra security to it.
+ <b>PAR</b>anoid <b>SEC</b>ure command-based binary protocol. It detects many attacks 
+including certificate-based MITM over SSL and DNS spoofing. being completely immune to many 
+SSL flaws and effectively work on plain `HTTP`. The latter is a recommended connection type
+to use outside the browser pages context, as SSL only slows parsec down not adding any extra security to it.
 
 When running from browser page it is necessary to use https connections as browsers
 know yet nothing about parsec and assume any `http` connections insecure, which,
@@ -31,7 +31,7 @@ our projects, including PWAs and b2b integrations.
 ## Usage
 
 For details, see [online documentation](https://kb.universablockchain.com/system/static/uparsecjs/index.html), 
-recommented entry point is a [Session](https://kb.universablockchain.com/system/static/uparsecjs/classes/_parsecsession_.session.html)
+recommended entry point is a [Session](https://kb.universablockchain.com/system/static/uparsecjs/classes/_parsecsession_.session.html)
 class. Example code:
 
 ~~~ts
@@ -67,13 +67,13 @@ We try to self-document all parts as much as possible.
 
 ## Additional content
 
-This library also contains all-purppsed or specialized library functions, notably:
+This library also contains all-purpose or specialized library functions, notably:
 
 - [UNS name reduction](https://kb.universablockchain.com/system/static/uparsecjs/modules/_uns_.html) to prevent "looks alike" attacks. 
-- [Zedentials](https://kb.universablockchain.com/system/static/uparsecjs/modules/_uns_.html) to safely keep sensitive credentials to nover touch disk, ransomware defence. 
+- [Zedentials](https://kb.universablockchain.com/system/static/uparsecjs/modules/_uns_.html) to safely keep sensitive credentials by never touching the disk, ransomware defence. 
 - [Password strength estimator](https://kb.universablockchain.com/system/static/uparsecjs/classes/_passwords_.passwords.html#estimatebitstrength)
-- [Unversa Text Format converters](https://kb.universablockchain.com/system/static/uparsecjs/modules/_text_tools_.html)
+- [Universa Text Format converters](https://kb.universablockchain.com/system/static/uparsecjs/modules/_text_tools_.html)
 
-## Licesnse 
+## License 
 
 MIT, see the repository.

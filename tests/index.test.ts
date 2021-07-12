@@ -1,6 +1,4 @@
-import { compareVersions } from "../src";
-import { bytesToUtf8, utf8ToBytes } from "../src/tools";
-import { Passwords } from "../src/Passwords";
+import { bytesToUtf8, compareVersions, Passwords, utf8ToBytes } from "../src";
 
 it("has right version and compare", () => {
   expect(compareVersions("0.1.0", "0.1.0")).toBe(0);

@@ -1,6 +1,8 @@
+// noinspection ExceptionCaughtLocallyJS
+
 import { CachedValue } from "./CachedValue";
 
-function _calcuateExclusions(): string[] {
+function _calculateExclusions(): string[] {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   return excludedNames.map(name => UNS.reduce(name) )
 }
@@ -101,7 +103,7 @@ const DEFAULT_XLAT2_FINALIZER = `
 # Final similarity corrections table
 #
 # English correcting similar-looking glyphs. This section MUST be the last
-# AND should altrer XLAT 2 table the following way:
+# AND should alter XLAT 2 table the following way:
 #
 # foreach ch in final
 # - if xlat2[*] =
@@ -265,7 +267,7 @@ export class UNS {
     return result;
   }
 
-  private static cachedExcludes = new CachedValue<Set<string>>(()=> new Set(_calcuateExclusions()));
+  private static cachedExcludes = new CachedValue<Set<string>>(()=> new Set(_calculateExclusions()));
   /**
    * Reduced names that are often rejected by services when used for registration
    */

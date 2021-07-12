@@ -22,12 +22,12 @@ export class CofferException extends Error {
 
 /**
  * Coffer: cryptocontainer locked by any of some set of keys (at least one, no "open" coffers could exist).
- * Variant of Universa Capsule, simplified and enhanced in the same time. Primarly to exchange data among multiple
+ * Variant of Universa Capsule, simplified and enhanced in the same time. Primarily to exchange data among multiple
  * parties in end-to-end environment, safe cloud stores, etc.
  *
  * # Use cases
  *
- * ## New safebox from scratch
+ * ## New safe box from scratch
  *
  * Create new safebox, add/replace content, add/remove keys
  *
@@ -38,9 +38,9 @@ export class CofferException extends Error {
  *   const packedBytes = await box.pack();
  * ~~~
  *
- * ## Open existing coffeer using one known key
+ * ## Open existing coffer using one known key
  *
- * If at least one key is known, it is possible to open a packed sandbox. With the open coffer it is possoble
+ * If at least one key is known, it is possible to open a packed sandbox. With the open coffer it is possible
  * to change data and keys and repack it.
  *
  * ~~~
@@ -61,7 +61,7 @@ export class CofferException extends Error {
  *
  * ~~~
  *  if( Coffer.hasPassword(packedCoffer) ) {
- *    // hypotetic code
+ *    // hypothetical code
  *    const password: string = prompt("enter password:");
  *    await Coffer.unpack(packedCoffer, password);
  *  }
@@ -166,7 +166,7 @@ export class Coffer {
       let keyRecord: InnerKeyRecord | undefined;
       let key: UniversalKey | undefined;
 
-      // Scan to find a key that will open this coofer:
+      // Scan to find a key that will open this coffer:
       for (let k of keys) {
         if (k instanceof UniversalKey) {
           // its a key, not password
@@ -193,7 +193,7 @@ export class Coffer {
         }
       }
       if (!keyRecord || !key)
-        throw new CofferException("no matcing key");
+        throw new CofferException("no matching key");
 
       this.innerKey = new SymmetricKey({ keyBytes: await key.decrypt(keyRecord.encryptedKey) });
       this._preparedPayload = serialized.payload;
@@ -242,7 +242,7 @@ export class Coffer {
     for (let k of keys) {
       const key = bytesToHex(k.tag.id);
       if (this.innerKeyRecords.has(key))
-        console.warn("key already exist in the safebox, ingnoring");
+        console.warn("key already exist in the safebox, ignoring");
       else {
         this.innerKeyRecords.set(key, {
           tag: k.tag,

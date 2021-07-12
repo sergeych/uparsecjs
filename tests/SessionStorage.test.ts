@@ -1,20 +1,8 @@
-import {
-  byteArrayToLong,
-  concatenateBinary,
-  decode64url,
-  encode64url,
-  equalArrays,
-  longToByteArray,
-  retry,
-  utf8ToBytes
-} from "../src/tools";
-import { bytesToHex, decode64, PrivateKey, SHA, SymmetricKey } from "unicrypto";
-import { UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
-import { bossDump, BossObject, BossPrimitive, bossUnpack, bossUnpackObject, sha256 } from "../src";
+import { SymmetricKey, unicryptoReady } from "unicrypto";
 import { MemorySessionStorage } from "../src/MemorySessionStorage";
 import { PrefixedSessionStorage } from "../src/PrefixedSessionStorage";
-import { Type } from "typedoc/dist/lib/models";
 import { CachedSessionStorage } from "../src/CachedMemoryStorage";
+import { EncryptedSessionStorage } from "../src/EncryptedSessionStorage";
 
 
 it("provides prefixed and memory session storages", () => {
@@ -77,9 +65,6 @@ it("connected underlying storage to CachedStorage", () => {
   expect(cs.getItem("reason")).toEqual("42");
   expect(ms.getItem("reason")).toEqual("42");
 });
-
-import { unicryptoReady } from 'unicrypto'
-import { EncryptedSessionStorage } from "../src/EncryptedSessionStorage";
 
 it("provides encrypted storage", async () => {
   await unicryptoReady;

@@ -1,8 +1,10 @@
+// noinspection ExceptionCaughtLocallyJS
+
 /**
  * Zedentials. ZEro Dis Exposition creDENTIALS.
  *
  * The main idea is to provide a set of tools to create heavily encrypted configuration file
- * containig set of fields and keys that are generated on the fly, in RAM, never touching a disk.
+ * containing set of fields and keys that are generated on the fly, in RAM, never touching a disk.
  *
  * The usual method of generating keys and saving configuration files on the local disk then encrypting
  * it to the "vault" or like to be deployed and decrypted on the target server just does not work in nowadays

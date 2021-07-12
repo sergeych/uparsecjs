@@ -1,11 +1,11 @@
 /**
- * Universa text objects allow ti embed universa objects into text focuments, e.g. markdown,
+ * Universa text objects allow ti embed universa objects into text documents, e.g. markdown,
  * plain text, html, whatever, detect such objects presence and extract them. I allows create
  * free form human readable documents with embedding necessary objects directly into the text.
  * @module text_tools
  */
 import { decode64, encode64, PrivateKey, PublicKey } from "unicrypto";
-import { bossLoad, bytesToUtf8, sha256 } from "./index";
+import { bossLoad, sha256 } from "./index";
 
 export type PackedObjectType = "unknown" | "unencrypted private key" | "encrypted private key" |
   "public key" | "contract";
@@ -27,7 +27,7 @@ export interface PackedTextObject {
    */
   fileName?: string,
   /**
-   * this field is used by formatter and set by the parser, detected sparator line width or
+   * this field is used by formatter and set by the parser, detected separator line width or
    * desired block with when formatting an object.
    */
   width?: number
@@ -73,7 +73,7 @@ export function symmetricPad(source: string, padding: string, width: number): st
 
 /**
  * Break string to array of strings with desired width. All strings except the last one will have specified
- * width, last one could be also shorter, but not enpty.
+ * width, last one could be also shorter, but not empty.
  * @param source to break
  * @param width desired width
  */
@@ -106,7 +106,7 @@ export class UniversaTextObjectFormatter {
 
     const body: string[] = [];
     for (const k in params) {
-      if (k != "width" && k != "packed")
+      if ( params.hasOwnProperty(k) && k != "width" && k != "packed")
         body.push(`${k}: ${params[k]}`.trim());
     }
     body.push("");

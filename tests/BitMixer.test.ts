@@ -4,11 +4,6 @@
 //   return ua;
 // }
 
-import { Passwords } from "../src/Passwords";
-import { utf8ToBytes } from "../src/tools";
-import { Coffer, CofferException, SerializedCoffer } from "../src/Coffer";
-import { UniversalKey, UniversalPasswordKey, UniversalPrivateKey, UniversalSymmetricKey } from "../src/UnversalKeys";
-import { decode64, encode58, PrivateKey } from "unicrypto";
 import { BitMixer } from "../src/BitMixer";
 import { sha3_384 } from "../src";
 

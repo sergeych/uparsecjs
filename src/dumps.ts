@@ -1,5 +1,5 @@
 /**
- * Convert integer number to hex form filling with unisgnificant zeroes to specified with,
+ * Convert integer number to hex form filling with insignificant zeroes to specified with,
  * if shorter. Longer numbers are left  intact (e.g. wider than requested).
  *
  * @param value to convert.
@@ -51,7 +51,7 @@ export function binaryDumpLines(data: Uint8Array): string[] {
 
 /**
  * Create text dump of binary data, as a string with line breaks. See [[binaryDumpLines]] for
- * fornat description.
+ * format description.
  *
  * @param data binary data to dump
  * @return dump as a string

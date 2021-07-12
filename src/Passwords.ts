@@ -1,5 +1,5 @@
 /**
- * Utility class to weight password characters strength against a brutforce attack
+ * Utility class to weight password characters strength against a brute force attack
  * considering no dates, keyboard sequences and words are used...
  */
 class CharacterClass {
@@ -41,7 +41,7 @@ const characterClasses = [
 export class Passwords {
   /**
    * Calculate estimated bits-length strength equivalent against the brute force. The
-   * estimtation is more effective if the character used are really random. It does not
+   * estimation is more effective if the character used are really random. It does not
    * analyze against repeating sequences, well known patterns and words and dates that
    * will not be detected and render password weak despite what this function returns.
    *

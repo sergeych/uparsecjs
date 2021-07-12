@@ -337,7 +337,7 @@ export class UniversalPrivateKey extends UniversalKey {
    * How many bytes we can put inside PK encryption (depends on padding and key size)
    */
   protected async maxDataSize(): Promise<number> {
-    return await this.privateKey.publicKey.encryptionMaxLength(this.options);
+    return this.privateKey.publicKey.encryptionMaxLength(this.options);
   }
 
   async decrypt(ciphertext: Uint8Array) {
@@ -474,7 +474,7 @@ export interface PasswordKeyOptions {
 
 export class UniversalPasswordKey extends UniversalKey {
   // private readonly keyBytes: Uint8Array;
-  private key?: Promise<SymmetricKey>;
+  private readonly key?: Promise<SymmetricKey>;
   tag: PasswordKeyTag;
 
   /**
@@ -559,7 +559,7 @@ export class UniversalPasswordKey extends UniversalKey {
   }
 
   /**
-   * Create seceral keys derived from the same password using wide outout from the single KDF invocation.
+   * Create several keys derived from the same password using wide output from the single KDF invocation.
    * Keys are placed adjacent to the id area. The KDF function when using any of these keys is calculated
    * only once.
    *
