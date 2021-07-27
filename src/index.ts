@@ -1,17 +1,29 @@
 export * from "./AsyncStoredSerializedValue";
+export * from "./CachedMemoryStorage";
 export * from "./CachedStoredValue";
 export * from "./CachedValue";
+export * from "./Citr";
 export * from "./Coffer";
 export * from "./CompletablePromise";
+export * from "./dumps";
+export * from "./Emitter";
+export * from "./EncryptedSessionStorage";
 export * from "./Estimator";
 export * from "./Parsec";
+export * from "./LocalSessionStorage"
+export * from "./MemorySessionStorage"
+export * from "./Parsec"
+export * from "./ParsecExceptions"
 export * from "./ParsecSession";
 export * from "./Passwords";
-export * from "./Passwords";
+export * from "./PrefixedSessionStorage";
 export * from "./SimpleBoss";
 export * from "./StoredSerializedValue";
+export * from "./text_tools";
 export * from "./tools";
+export * from "./UNS";
 export * from "./UnversalKeys";
+export * from "./Zedentials";
 
 import { utf8ToBytes } from "./tools";
 

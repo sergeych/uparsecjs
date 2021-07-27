@@ -13,6 +13,7 @@ import { MemorySessionStorage } from "./MemorySessionStorage";
  * writes a password then connect the storage to some password protected (encrypted) storage,
  * for example, [[EncryptedSessionStorage]]. To do so,
  * construct CachedSessionStorage with no parameters and call [[connectToStorage]] when ready.
+ *
  */
 export class CachedSessionStorage extends MemorySessionStorage {
 
@@ -47,8 +48,8 @@ export class CachedSessionStorage extends MemorySessionStorage {
 
   /**
    * Connect storage as underlying. All data already stored will be copied to it. After this call
-   * this instance works as a cached proxy. To avoid strange bug _it is not possible to use underlying
-   * storage directly after connection_. Access it from the cached storage only.
+   * this instance works as a cached proxy. To avoid strange bugs _do not use underlying
+   * storage directly anymore_. Access it from the cached storage only.
    *
    * If the storage already connected ({@link isConnected} === true), it will throw exception unless
    * `forceReplace` is set to true.
@@ -61,6 +62,21 @@ export class CachedSessionStorage extends MemorySessionStorage {
     for( let [key, value] of this.toMap() )
       newStorage.setItem(key, value);
     this.storage = newStorage;
+  }
+
+  /**
+   * if the storage is connected, disconnect it and works as MemoryStorage from now on. This effectively drops
+   * also any cached content, so after this call the storage is always empty.
+   */
+  disconnect() {
+    if( this.storage ) this.storage = undefined;
+    super.clear();
+  }
+
+  clear() {
+    if( this.storage )
+      throw Error("can't clear connected cached storage: disconnect() it first");
+    super.clear();
   }
 
   /**

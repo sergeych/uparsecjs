@@ -1,8 +1,5 @@
-import { SymmetricKey, unicryptoReady } from "unicrypto";
-import { MemorySessionStorage } from "../src/MemorySessionStorage";
-import { PrefixedSessionStorage } from "../src/PrefixedSessionStorage";
-import { CachedSessionStorage } from "../src/CachedMemoryStorage";
-import { EncryptedSessionStorage } from "../src/EncryptedSessionStorage";
+import {SymmetricKey, unicryptoReady} from "unicrypto";
+import {CachedSessionStorage, EncryptedSessionStorage, MemorySessionStorage, PrefixedSessionStorage} from "../src";
 
 
 it("provides prefixed and memory session storages", () => {
@@ -39,6 +36,28 @@ it("provides immediately connected CachedStorage", () => {
   cs.setItem("reason", "42");
   expect(cs.getItem("reason")).toEqual("42");
   expect(ms.getItem("reason")).toEqual("42");
+});
+
+it("clears CachedStorage", () => {
+  const cs = new CachedSessionStorage();
+
+  cs.setItem("foo", "bar");
+  cs.setItem("bar", "buzz");
+
+  cs.clear();
+  expect(cs.getItem("foo")).toBeNull();
+  expect(cs.getItem("bar")).toBeNull();
+
+  cs.connectToStorage(new MemorySessionStorage());
+  cs.setItem("foo", "bar");
+  cs.setItem("bar", "buzz");
+
+  expect(()=> {
+    cs.clear();
+  }).toThrowError();
+
+  expect(cs.getItem("foo")).toEqual("bar");
+  expect(cs.getItem("bar")).toEqual("buzz");
 });
 
 it("connected underlying storage to CachedStorage", () => {
