@@ -91,28 +91,41 @@ it("provides encrypted storage", async () => {
   sessionStorage.clear();
   const key = new SymmetricKey();
   const ms = sessionStorage;
-  const cs = new EncryptedSessionStorage(ms,key);
+  const es = new EncryptedSessionStorage(ms,key);
 
-  cs.setItem("foo", "bar");
-  cs.setItem("bar", "buzz");
+  es.setItem("foo", "bar");
+  es.setItem("bar", "buzz");
 
-  expect(cs.getItem("foo")).toEqual("bar");
-  expect(cs.getItem("bar")).toEqual("buzz");
+  expect(es.getItem("foo")).toEqual("bar");
+  expect(es.getItem("bar")).toEqual("buzz");
 
-  const cs2 = new EncryptedSessionStorage(ms, key);
-  expect(cs2.getItem("foo")).toEqual("bar");
-  expect(cs2.getItem("bar")).toEqual("buzz");
+
+  const es2 = new EncryptedSessionStorage(ms, key);
+  expect( () =>new EncryptedSessionStorage(ms, new SymmetricKey()))
+    .toThrowError();
+  expect(es2.getItem("foo")).toEqual("bar");
+  expect(es2.getItem("bar")).toEqual("buzz");
+
+  expect(es2.isClosed).toBe(false);
+  es2.close();
+  expect(es2.isClosed).toBe(true);
+  expect( () => es2.getItem("foo"))
+    .toThrowError();
+  expect( () => es2.setItem("foo", "1"))
+    .toThrowError();
+  expect( () => es2.removeItem("foo"))
+    .toThrowError();
+
 
   expect(ms.getItem("foo")).toEqual(null);
   expect(ms.getItem("bar")).toEqual(null);
 
-  expect( () =>new EncryptedSessionStorage(ms, new SymmetricKey()))
-    .toThrowError();
 
-  for( let i=0; i< sessionStorage.length; i++) {
-    const k = sessionStorage.key(i);
-    console.log(`${k}: ${sessionStorage.getItem(k!)}`);
-  }
+
+  // for( let i=0; i< sessionStorage.length; i++) {
+  //   const k = sessionStorage.key(i);
+  //   console.log(`${k}: ${sessionStorage.getItem(k!)}`);
+  // }
   expect(EncryptedSessionStorage.existsIn(sessionStorage)).toBeTruthy();
   EncryptedSessionStorage.clearIn(sessionStorage);
   expect(EncryptedSessionStorage.existsIn(sessionStorage)).toBeFalsy();

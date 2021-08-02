@@ -69,8 +69,7 @@ export class CachedSessionStorage extends MemorySessionStorage {
    * also any cached content, so after this call the storage is always empty.
    */
   disconnect() {
-    if( this.storage ) this.storage = undefined;
-    super.clear();
+    this.storage = undefined;
   }
 
   clear() {

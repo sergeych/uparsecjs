@@ -41,6 +41,8 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
   #cachedKeys = new Map<string,string>();
   #cachedValues = new Map<string,string>();
 
+  private _closed = false;
+
   /**
    * Open existing or construct new storage over web storage or paresec session storage.
    * Note that it will throw exception if there is already data of an encrypted storage created
@@ -84,7 +86,12 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
     return result;
   }
 
+  private checkClosed() {
+    if( this._closed ) throw new Error("encrypted storage is closed");
+  }
+
   getItem(key: string): string | null {
+    this.checkClosed();
     let result = this.#cachedValues.get(key) ?? null;
     if( result ) return result;
     const tk = this.transformKey(key);
@@ -97,16 +104,22 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
   }
 
   removeItem(key: string): void {
+    this.checkClosed();
     this.#cachedValues.delete(key);
     this.storage.removeItem(this.transformKey(key));
   }
 
   setItem(key: string, value: string): void {
+    this.checkClosed();
     this.#cachedValues.set(key,value);
     this.storage.setItem(this.transformKey(key),
       encode64(this.#key.etaEncryptSync(utf8ToBytes(value)))
     );
   }
+
+  close() { this._closed = true; }
+
+  get isClosed(): boolean { return this._closed; }
 
   /**
    * Wipe out all encrypted storage data from some web storage-like object. Note that parsec storages
