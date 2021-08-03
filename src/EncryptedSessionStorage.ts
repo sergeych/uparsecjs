@@ -8,14 +8,17 @@ interface Initializer extends BossObject{
   keyPrefix: Uint8Array;
   keyPostfix: Uint8Array;
   version: number;
+  packedKey?: Uint8Array
 }
 
 const plainPrefix = "._$EnCsT$._";
 const initializerKey= plainPrefix + "li3u45hfd7d91GJg"
 /**
  * Storage that encrypts its contents on the fly.
- * It is pessimistic and paranoid so it encrypts also keys and therefore it can b etime consuming,
- * so it caches everything in memory to not to re-encrypt keys and re-decrypt values.
+ * It is pessimistic and paranoid so it encrypts also keys and therefore it can be time consuming,
+ * so it caches everything in memory to not to re-encrypt keys and re-decrypt values. New version
+ * storages support also changing key on the fly. V1 storages can't be upgraded to support it,
+ * so it is necessary to somehow copy all its contents ot V2 storage.
  *
  * __Important__. It uses synchronous unicrypto interfaces and needs unicrypto library be
  * initialized before, e.g.
@@ -35,13 +38,32 @@ const initializerKey= plainPrefix + "li3u45hfd7d91GJg"
  */
 export class EncryptedSessionStorage implements ParsecSessionStorage{
 
-  #key: SymmetricKey;
+  // the key used to encrypt/decrypt stored data
+  readonly #key: SymmetricKey;
+
+  // key transformation params
   readonly #prefix: Uint8Array;
   readonly #postfix: Uint8Array;
-  #cachedKeys = new Map<string,string>();
-  #cachedValues = new Map<string,string>();
 
-  private _closed = false;
+  // cache for transformed keys
+  readonly #cachedKeys = new Map<string,string>();
+
+  // cache for stored values
+  readonly #cachedValues = new Map<string,string>();
+
+  // this key is used to encrypt initializer only (and initializer contains data key)
+  #accessKey: SymmetricKey;
+
+  // mark to prevent any data access and/or change
+  #_closed = false;
+
+  /**
+   * Current storage version. Versions have following differences:
+   * - v1 does not allow [[changeKey]]
+   * - v2+ can change access key on the fly
+   */
+  readonly version;
+
 
   /**
    * Open existing or construct new storage over web storage or paresec session storage.
@@ -53,27 +75,44 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
    * wasm module, to be sure to await for unicrypto before use (see class description).
    *
    * @param storage to construct over.
-   * @param key to encrypt with.
+   * @param accessKey to encrypt with.
    *
    * @throws Error if the storage already has data for encrypted session storage but the key is wrong
    */
-  constructor(private storage: ParsecSessionStorage | Storage,key: SymmetricKey) {
-    this.#key = key;
+  constructor(private storage: ParsecSessionStorage | Storage,accessKey: SymmetricKey) {
     const packedInitializer = this.storage.getItem(initializerKey);
     let initializer: Initializer;
     if( packedInitializer )
-      initializer = bossLoad(key.etaDecryptSync(decode64(packedInitializer)));
+      initializer = bossLoad(accessKey.etaDecryptSync(decode64(packedInitializer)));
     else {
       initializer = {
-        version: 1,
+        version: 2,
         keyPrefix: randomBytes(32),
-        keyPostfix: randomBytes(32)
+        keyPostfix: randomBytes(32),
+        packedKey: new SymmetricKey().pack()
       };
-      this.storage.setItem(initializerKey, encode64(key.etaEncryptSync(bossDump(initializer))));
+      this.storage.setItem(initializerKey, encode64(accessKey.etaEncryptSync(bossDump(initializer))));
     }
     // initialize key encryption subsystem
+    this.#accessKey = accessKey;
     this.#prefix = initializer.keyPrefix;
     this.#postfix = initializer.keyPostfix;
+    this.#key = initializer.version == 1 ? accessKey : new SymmetricKey({keyBytes:initializer.packedKey});
+    this.version = initializer.version;
+  }
+
+  /**
+   * Change encryption key without altering contents of the storage. Works with storages v.1+ otherwise
+   * throws an error.
+   * @param newKey
+   */
+  changeKey(newKey: SymmetricKey) {
+    const packed = this.storage.getItem(initializerKey);
+    if( !packed ) throw new Error("illegal state: no initializer found in constructed encrypted ESS");
+    const initializer: Initializer = bossLoad(this.#accessKey.etaDecryptSync(decode64(packed)));
+    if( !initializer.packedKey ) throw new Error("old ESS version does not support key change");
+    this.storage.setItem(initializerKey, encode64(newKey.etaEncryptSync(bossDump(initializer))));
+    this.#accessKey = newKey;
   }
 
   private transformKey(key: string) {
@@ -87,7 +126,7 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
   }
 
   private checkClosed() {
-    if( this._closed ) throw new Error("encrypted storage is closed");
+    if( this.#_closed ) throw new Error("encrypted storage is closed");
   }
 
   getItem(key: string): string | null {
@@ -117,9 +156,9 @@ export class EncryptedSessionStorage implements ParsecSessionStorage{
     );
   }
 
-  close() { this._closed = true; }
+  close() { this.#_closed = true; }
 
-  get isClosed(): boolean { return this._closed; }
+  get isClosed(): boolean { return this.#_closed; }
 
   /**
    * Wipe out all encrypted storage data from some web storage-like object. Note that parsec storages

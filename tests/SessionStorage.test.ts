@@ -133,3 +133,24 @@ it("provides encrypted storage", async () => {
   expect(cs3.getItem("foo")).toEqual(null);
   expect(cs3.getItem("bar")).toEqual(null);
 })
+
+it("changes key of the encrypted storage", async () => {
+  await unicryptoReady;
+  const k1 = new SymmetricKey();
+  const k2 = new SymmetricKey();
+  const ms = new MemorySessionStorage();
+  let es = new EncryptedSessionStorage(ms, k1);
+  es.setItem("foo", "bar");
+
+  es = new EncryptedSessionStorage(ms, k1);
+  expect(es.getItem("foo")).toEqual("bar");
+  es.changeKey(k2);
+  es.setItem("some","value");
+
+  expect( () => es = new EncryptedSessionStorage(ms, k1))
+    .toThrowError();
+
+  es = new EncryptedSessionStorage(ms, k2);
+  expect(es.getItem("foo")).toEqual("bar");
+  expect(es.getItem("some")).toEqual("value");
+})
