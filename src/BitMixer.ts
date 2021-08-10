@@ -1,4 +1,4 @@
-import { SHA, CryptoWorker } from "unicrypto";
+import { SHA, CryptoWorker, isWorkerAvailable } from "unicrypto";
 
 /**
  * Bit manipulation routines (used for example in Parsec POW)
@@ -30,18 +30,20 @@ export class BitMixer {
     return length;
   }
 
-  static SolvePOW1Worker(source: Uint8Array, length: number): Promise<Uint8Array> {
+  static SolvePOW1(source: Uint8Array, length: number): Promise<Uint8Array> {
+    if (!isWorkerAvailable()) return this.SolvePOW1Blocking(source, length);
+
     function exec(resolve, reject) {
       const { length, source } = this.data;
 
-      this.SolvePOW1(source, length).then(resolve, reject);
+      this.SolvePOW1Blocking(source, length).then(resolve, reject);
     }
 
     return CryptoWorker.run(exec, {
       data: { source, length },
       functions: {
         countZeroes: BitMixer.countZeroes,
-        SolvePOW1: BitMixer.SolvePOW1
+        SolvePOW1Blocking: BitMixer.SolvePOW1Blocking
       }
     });
   }
@@ -52,7 +54,7 @@ export class BitMixer {
    * @param source
    * @param length
    */
-  static SolvePOW1(source: Uint8Array, length: number): Promise<Uint8Array> {
+  static SolvePOW1Blocking(source: Uint8Array, length: number): Promise<Uint8Array> {
     const { SHA, countZeroes } = this;
     const buffer = Uint32Array.from([0, 0]);
     let index = 0;
