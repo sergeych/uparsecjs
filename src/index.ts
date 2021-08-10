@@ -24,7 +24,6 @@ export * from "./tools";
 export * from "./UNS";
 export * from "./UnversalKeys";
 export * from "./Zedentials";
-export * from "./BitMixer";
 
 import { utf8ToBytes } from "./tools";
 
