@@ -69,7 +69,13 @@ export class POW {
   static async solve(task: POWTask): Promise<Uint8Array> {
     switch (task.type) {
       case 1:
-        return await BitMixer.SolvePOW1(task.source, task.length);
+        try {
+          return await BitMixer.SolvePOW1(task.source, task.length);
+        }
+        catch(e) {
+          console.warn("failed to perform POW1 in worker, using blocking. Error:", e);
+          return await BitMixer.SolvePOW1Blocking(task.source, task.length);
+        }
       default:
         throw new ParsecAuthenticationException("unsupported POW task type: " + task.type);
     }

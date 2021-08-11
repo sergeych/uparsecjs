@@ -1,7 +1,9 @@
 import { CachedStoredValue, ParsecSessionStorage, POW, POWTask, RootConnection, Session, utf8ToBytes } from "../src";
 
 import { decode64, encode64, PrivateKey, randomBytes } from "unicrypto";
-import { MemorySessionStorage } from "../src/MemorySessionStorage";
+import { MemorySessionStorage } from "../src";
+
+jest.setTimeout(15000);
 
 class TestSessionStorage implements ParsecSessionStorage {
 
@@ -57,9 +59,7 @@ it("requests SCK", async () => {
   expect(info.parsecVersions).toContain("1.1")
 
   let r = await rc.call("requestSCK", {SCKAddress: await tkAddress, testMode: true});
-  // console.log(r);
-  let solution = await POW.solve(r.POWTask);
-  // console.log(solution);
+  await POW.solve(r.POWTask);
 });
 
 it("re/connects", async() => {
