@@ -77,6 +77,11 @@ export class Passwords {
   private static idChars =
     "1234567890_qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 
+  private static strongPasswordChars =
+    Passwords.idChars + "!@#$%^&*()-_=+\\|<>'\"/?.>,<`~[]{}:;"
+
+
+
   /**
    * Create random string of a given length constructed from characters that are
    * ok for most ids (e.g. letters digits and _)
@@ -89,5 +94,33 @@ export class Passwords {
       result += this.idChars[Math.floor(Math.random() * l)];
     }
     return result;
+  }
+  /**
+   * Generate random strong password of a give size and estimated strength. It is __strongly recommended__ not to alter
+   * default values which are reasonably good. Note that length should be long enough or generator will fail with error
+   * after 1000 attempts.
+   *
+   * @param length desired password length. Password will be of this length, exactly.
+   * @param minStrength minimum estimated strength, in bits.
+   * @throws Error if failed to generate the password of desired length and strength after 1000 attempts.
+   */
+  static create(length=12, minStrength= 256): string {
+    function g() {
+      const l = Passwords.strongPasswordChars.length;
+      let result = "";
+      while (result.length < length) {
+        result += Passwords.strongPasswordChars[Math.floor(Math.random() * l)];
+      }
+      return result;
+    }
+    let attempt = 1000;
+    while(attempt-- > 0) {
+      const password = g();
+      if( Passwords.estimateBitStrength(password) >= minStrength ) {
+        console.log("attempts: "+(1000-attempt));
+        return password;
+      }
+    }
+    throw new Error("Can't generate password of 256+ bits strength with length "+length);
   }
 }

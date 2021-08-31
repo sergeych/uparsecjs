@@ -6,16 +6,18 @@ import {
   byteArrayToLong,
   concatenateBinary,
   decode64url,
+  Emitter,
   encode64url,
   equalArrays,
   longToByteArray,
+  Passwords,
   retry,
   sha256,
+  UniversaTextObjectFormatter,
+  UniversaTextObjectParser,
   utf8ToBytes
 } from "../src";
 import { bytesToHex, decode64, PrivateKey, SHA } from "unicrypto";
-import { UniversaTextObjectFormatter, UniversaTextObjectParser } from "../src/text_tools";
-import { Emitter } from "../src/Emitter";
 
 it("retry OK", async () => {
   let count = 0;
@@ -97,6 +99,15 @@ it("emits", ()=>{
   e.fire("s4");
   expect(lastVal).toBe("s3");
 
+});
+
+it("generates good passwords", () => {
+
+  const psw = Passwords.create();
+  // console.log(psw);
+  const strength = Passwords.estimateBitStrength(psw);
+  // console.log("str "+strength);
+  expect(strength).toBeGreaterThanOrEqual(256);
 });
 
 // it("runs completable promises", async () => {
