@@ -28,8 +28,8 @@ const portableFetch = isNode ? require('node-fetch') : window.fetch;
 
 /**
  * Some minimal subset of Storage (like window.sessionStorage/localStorage
- * needed to keep and manage permanent Parsec sessions. Window.localStorage and Window.sessionStorage
- * comply.
+ * needed to keep and manage permanent Parsec sessions. Window.localStorage and
+ * Window.sessionStorage comply.
  */
 export interface ParsecSessionStorage {
   /**
@@ -39,14 +39,18 @@ export interface ParsecSessionStorage {
   getItem(key: string): string | null;
 
   /**
-   * Removes the key/value pair with the given key f  rom the list associated with the object, if a key/value pair with the given key exists.
+   * Removes the key/value pair with the given key f  rom the list associated with the
+   * object, if a key/value pair with the given key exists.
    */
   removeItem(key: string): void;
 
   /**
-   * Sets the value of the pair identified by key to value, creating a new key/value pair if none existed for key previously.
+   * Sets the value of the pair identified by key to value, creating a new key/value pair
+   * if none existed for key previously.
    *
-   * Throws a "QuotaExceededError" DOMException exception if the new value couldn't be set. (Setting could fail if, e.g., the user has disabled storage for the site, or if the quota has been exceeded.)
+   * Throws a "QuotaExceededError" DOMException exception if the new value couldn't be
+   * set. (Setting could fail if, e.g., the user has disabled storage for the site, or if
+   * the quota has been exceeded.)
    */
   setItem(key: string, value: string): void;
 }
@@ -69,7 +73,8 @@ export class Command {
   }
 
   /**
-   * Unpack remote binary command result (parsec) and extract the returned value (or empty object {}) or throw
+   * Unpack remote binary command result (parsec) and extract the returned value (or
+   * empty object {}) or throw
    * {@link RemoteException} if the execution result is an error.
    *
    * @param packed
@@ -83,29 +88,31 @@ export class Command {
 }
 
 /**
- * Interface to any parsec connection level, it is always the same despite of protection level.
- * Generally, parsec connection could use any transport, not only HTTP/S, an dany such transport
- * should be implemented as this interface. For example {@link RootConnection} implements parsec.0
- * commands, which are used in parsec.1 [[Session]], which consumes [[PConnection]] and implements it already
- * at protocol level 1 protected commands.
+ * Interface to any parsec connection level, it is always the same despite of protection
+ * level. Generally, parsec connection could use any transport, not only HTTP/S, an dany
+ * such transport should be implemented as this interface. For example
+ * {@link RootConnection} implements parsec.0 commands, which are used in parsec.1
+ * [[Session]], which consumes [[PConnection]] and implements it already at protocol
+ * level 1 protected commands.
  */
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface PConnection {
   /**
    * Execute remote api function
-   * @param method name of the remote method to execute, e.g. 'requestLogin', 'version', etc.
+   * @param method name of the remote method to execute, e.g. 'requestLogin', 'version',
+   *   etc.
    * @param params any parameters to be passed to the remote method
-   * @return promise containing answer object (key-value). It can be empty (.e.g. {}) but can't be null or
-   *         undefined.
+   * @return promise containing answer object (key-value). It can be empty (.e.g. {}) but
+   *   can't be null or undefined.
    * @throws RemoteException if remote sends error result
    */
   call(method: string, params: any): Promise<any>;
 }
 
 /**
- * Level 0 parsec connection, used to execute authentication and registration commands, which
- * in turn should provide credentials to connect a secure {@link Endpoint}. Usually, this type of
- * connection is used to access API root, what explains the name.
+ * Level 0 parsec connection, used to execute authentication and registration commands,
+ * which in turn should provide credentials to connect a secure {@link Endpoint}.
+ * Usually, this type of connection is used to access API root, what explains the name.
  */
 export class RootConnection implements PConnection {
 
@@ -115,8 +122,8 @@ export class RootConnection implements PConnection {
    * Construct anonymous parsec connection gate using a given root URL, which is
    * typical "https://acme.com/api/p1" or "https://parsec.acme.com/p1" - p1 means it
    * accepts and executes level 1 commands that come without extra authentication and
-   * encryption. See {@link Endpoint} and {@link "ParsecSession"} for Session class that consumes
-   * and implements PConnection.
+   * encryption. See {@link Endpoint} and {@link "ParsecSession"} for Session class that
+   * consumes and implements PConnection.
    *
    * @param rootUri URI to connect to.
    */
@@ -162,9 +169,10 @@ export class RootConnection implements PConnection {
 }
 
 /**
- * The adapter for encrypted/authenticated commands. Basically endpoint is created during registration/login
- * or host authentication procedures. There could be nested endpoints too. Basically, Endpoint is just a
- * encrypted and authenticated version of {@link RootConnection}.
+ * The adapter for encrypted/authenticated commands. Basically endpoint is created during
+ * registration/login or host authentication procedures. There could be nested endpoints
+ * too. Basically, Endpoint is just a encrypted and authenticated version of
+ * {@link RootConnection}.
  */
 export class Endpoint implements PConnection {
   readonly #authToken: string;

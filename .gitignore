@@ -1,4 +1,4 @@
-v./docs/
+./docs/
 /dist/
 /coverage/
 /package-lock.json

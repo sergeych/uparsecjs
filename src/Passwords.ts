@@ -80,6 +80,9 @@ export class Passwords {
   private static strongPasswordChars =
     Passwords.idChars + "!@#$%^&*()-_=+\\|<>'\"/?.>,<`~[]{}:;"
 
+  private static limitedPasswordChars =
+    Passwords.idChars + "?!$+-/.,@ˆ_"
+
 
 
   /**
@@ -102,14 +105,17 @@ export class Passwords {
    *
    * @param length desired password length. Password will be of this length, exactly.
    * @param minStrength minimum estimated strength, in bits.
+   * @param limitedSet do not use extended set of punctuation characters to comply with some low security old services
+   *                   wchich impose severe restriction on passwords (to make it breakable?)
    * @throws Error if failed to generate the password of desired length and strength after 1000 attempts.
    */
-  static create(length=12, minStrength= 256): string {
+  static create(length=12, minStrength= 256,limitedSet=false): string {
+    const chars = limitedSet ? Passwords.limitedPasswordChars : Passwords.strongPasswordChars
     function g() {
-      const l = Passwords.strongPasswordChars.length;
+      const l = chars.length;
       let result = "";
       while (result.length < length) {
-        result += Passwords.strongPasswordChars[Math.floor(Math.random() * l)];
+        result += chars[Math.floor(Math.random() * l)];
       }
       return result;
     }

@@ -42,7 +42,7 @@ export class CompletablePromise<T> implements Promise<T> {
 
   /**
    * Set promise to rejected state.
-   * @param result
+   * @param error rejection reason
    * @throws Error if already completed
    */
   reject(error?: any) {
@@ -56,7 +56,7 @@ export class CompletablePromise<T> implements Promise<T> {
   }
 
   then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | undefined | null, onRejected?: ((reason: any) => (PromiseLike<TResult2> | TResult2)) | undefined | null): Promise<TResult1 | TResult2> {
-    return this.#promise.then(onfulfilled);
+    return this.#promise.then(onfulfilled, onRejected);
   }
 
   get isCompleted(): boolean { return this.#isCompleted; }

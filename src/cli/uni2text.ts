@@ -125,7 +125,7 @@ const fs = require('fs').promises;
             outName = await getFreeFileName(obj.fileName)
           }
           else {
-            outName = defaultNamefor(obj.type);
+            outName = defaultNameFor(obj.type);
           }
           await fs.writeFile(outName, obj.packed);
           console.log(`Extracted ${obj.type} to ${outName}`);
@@ -161,7 +161,7 @@ async function getFreeFileName(fileName: string): Promise<string> {
   throw "can't create output file name";
 }
 
-function defaultNamefor(type: string): string {
+function defaultNameFor(type: string): string {
   switch(type) {
     case 'public key': return "unpacked.public.unikey";
     case 'unencrypted private key': return "unpacked.private.unikey";
