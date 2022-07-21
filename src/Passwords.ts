@@ -78,10 +78,10 @@ export class Passwords {
     "1234567890_qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 
   private static strongPasswordChars =
-    Passwords.idChars + "!@#$%^&*()-_=+\\|<>'\"/?.>,<`~[]{}:;"
+    Passwords.idChars + "!@#$%^&*()-_=+\\|<>'\"/?.>,<`~[]{}:;";
 
   private static limitedPasswordChars =
-    Passwords.idChars + "?!$+-/.,@ˆ_"
+    Passwords.idChars;
 
 
 
@@ -127,6 +127,6 @@ export class Passwords {
         return password;
       }
     }
-    throw new Error("Can't generate password of 256+ bits strength with length "+length);
+    throw new Error(`Can't generate password of ${minStrength}+ bits strength with length ${length}`);
   }
 }

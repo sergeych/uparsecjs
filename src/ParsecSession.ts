@@ -1,4 +1,10 @@
-import { decode64, encode64, PrivateKey, SHA, SignedRecord } from "unicrypto";
+import {
+  decode64,
+  encode64,
+  PrivateKey,
+  SHA,
+  SignedRecord,
+} from "unicrypto";
 import { bossLoad } from "./SimpleBoss";
 import { randomBytes } from "crypto";
 import { equalArrays } from "./tools";

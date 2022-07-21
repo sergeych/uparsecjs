@@ -74,6 +74,10 @@ This library also contains all-purpose or specialized library functions, notably
 - [Password strength estimator](https://kb.universablockchain.com/system/static/uparsecjs/classes/_passwords_.passwords.html#estimatebitstrength)
 - [Universa Text Format converters](https://kb.universablockchain.com/system/static/uparsecjs/modules/_text_tools_.html)
 
+## Version notes
+
+- `^0.2.21` uses revised unicrypto `^1.12.2` which is a recommended version. It also has a minor improvement in limited-charset password generation to be compatible with services that do not allow puctuation.
+
 ## License 
 
 MIT, see the repository.

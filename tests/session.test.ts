@@ -1,6 +1,13 @@
 import { CachedStoredValue, ParsecSessionStorage, POW, POWTask, RootConnection, Session, utf8ToBytes } from "../src";
 
-import { decode64, encode64, PrivateKey, randomBytes } from "unicrypto";
+import {
+  decode64,
+  encode64,
+  KeyAddress,
+  PrivateKey,
+  randomBytes,
+  SignedRecord
+} from "unicrypto";
 import { MemorySessionStorage } from "../src";
 
 jest.setTimeout(15000);
@@ -29,9 +36,11 @@ class TestSessionStorage implements ParsecSessionStorage {
 }
 
 const testServiceKeyAddress = decode64("EMbhPh0J22t0EfITdXOhHnB2HKW9oBqxsIbWU7iBzGO4/N20x833lL527PBvV/ZSUnROnqs=");
+const testServiceKeyAddress2 = new KeyAddress("J1VHgsR6coVpG4HVEDmR9y2fX9x6gz7M1p6sAK5Byok9wWp54bKsZxHMMezmQG3W9PgrKQRf").asBinary;
 
 //If you don't have any parsec 1.x started locally, one can use some real public service:
-const rc = new RootConnection("https://api.myonly.cloud/api/p1");
+// const rc = new RootConnection("https://api.myonly.cloud/api/p1");
+const rc = new RootConnection("http://localhost:8080/api/p1");
 
 // though I'd recommend use local one
 // const rc = new RootConnection("http://localhost:8094/api/p1");
@@ -59,18 +68,27 @@ it("requests SCK", async () => {
   expect(info.parsecVersions).toContain("1.1")
 
   let r = await rc.call("requestSCK", {SCKAddress: await tkAddress, testMode: true});
-  await POW.solve(r.POWTask);
+  // console.log(">>r", r)
+  const result = await POW.solve(r.POWTask);
+  // console.log("-result", result)
 });
+
+it("test SR", async () => {
+  const packed = decode64("JgDECQEeCBwBAAHEAAGabj+Tgffaj7mVHEmQ/n8G2G7UK2zsoRvUUlul1skm2VDHyCPqQXWXqVFOtt4hlXxdzaWexEENBuHTHzJgUnkOCfgLwe2jDRK6X3jvbfYhk/HTv8AGzwkCaB6DoYHG0azCUC17bMQ1ivbO0rZ/8C+QAiSWi/bw3kNHe5e+TgqnkDarh1MGneHLfDJuz9WJIoRgztC/+Vf+R9KwFX5+dx3+/cRo+BVzfrkZ0dbqzLh6TJ++dFMPT55QQX1EDgHnbGfH/fLh6VeXe9N/TDzfNvx4v8TI+JlUS0jGzU8/8Dx/QTNNE53eQN6hMOzXR1xP44nKJoOnA9mnPMJFOvcti8rZxAABNUmLkXJkn3i6fVGhivxCOQc5zec9kiSEcMLMKT5ud3Rb0d7g/Gkccv3T6BScJnv71Q5hKp2WoehV8fV4Bee3hQA/PcO8vB6WvxAhdjabhuAPfKP8p9P0QEsFHQVTE/bR3sOnZ/0+04zT5w3sqyuif4tdLg+OZ5CcnLUinUQDvyQPs7Dwd3L4qtuzc0q9+tO7iecdnTqwY0qM3V8Me4I2TFW3xG++bp7mgs3KYU2jF/UYEBCGnsV2JyYzukkDDJpoEqG2LqJM2gr6k+tjopy19H7Y36ObvdBMBUK/gDSiydKqA4HOXxwQXbUkzAK7QZd2318592+HNONXDxLZ8rmJYbQWBQ9LUE9XUmVzdWx0RCwHAAAAAAAA\n")
+  const sr = await SignedRecord.unpack(packed)
+  console.log(sr.payload)
+})
 
 it("re/connects", async() => {
   const sessionStorage = new TestSessionStorage();
 
   const skaProvider = async (refresh: Boolean) => {
-    return [testServiceKeyAddress];
+    return [testServiceKeyAddress, testServiceKeyAddress2];
   }
 
   const session1 = new Session(sessionStorage, rc, skaProvider, true, 2048);
   let info = await session1.call("getSessionInfo");
+  console.log("session ingo",info);
   // console.log("info", info, `sessionid: ${await session1.id}`);
   // console.log("-------------------------------------------------",sessionStorage)
   expect(session1.sckGenerationCount).toBe(1);
